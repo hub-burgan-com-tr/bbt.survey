@@ -118,7 +118,7 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme",
+  "homepage": "https://github.com/hub-burgan-com-tr/bbt.survey.app",
   "jest": {
     "testURL": "http://localhost/",
     "testEnvironment": "jsdom",
