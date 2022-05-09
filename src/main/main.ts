@@ -58,9 +58,9 @@ import { resolveHtmlPath } from './util';
 var count = 0;
 const os = require('os');
 
-const appFolder = path.dirname(process.execPath);
-const exeName = path.basename(process.execPath);
-const time = new Date().getHours();
+// const appFolder = path.dirname(process.execPath);
+// const exeName = path.basename(process.execPath);
+// const time = new Date().getHours();
 var CronJob = require('cron').CronJob;
 const store = new Store();
 
@@ -124,10 +124,10 @@ afterRemoveOsName = osName.slice(2);
 ipcMain.on('electron-store-set', async (_event, _key, _val) => {
   // console.log(key, val, '********');
   // console.log(afterRemoveOsName, 'main');
-  store.set('appVersion', app.getVersion());
+
   store.set('osUser', afterRemoveOsName);
 });
-
+store.set('appVersion', app.getVersion());
 ipcMain.on('electron-store-get', async (event, val) => {
   event.returnValue = store.get(val);
 });
@@ -335,15 +335,15 @@ const createWindow = async () => {
  * Add event listeners...
  */
 
-app.setLoginItemSettings({
-  openAtLogin: true,
-  args: [
-    '--processStart',
-    `"${exeName}"`,
-    '--process-start-args',
-    `"--hidden"`,
-  ],
-});
+// app.setLoginItemSettings({
+//   openAtLogin: true,
+//   args: [
+//     '--processStart',
+//     `"${exeName}"`,
+//     '--process-start-args',
+//     `"--hidden"`,
+//   ],
+// });
 app.on('before-quit', function (_event: any) {
   isAppQuitting = true;
 });
@@ -375,7 +375,16 @@ app.on('ready', () => {
 
   var timeInterval: any = setInterval(() => {
     let showDate = new Date().getHours();
-    console.log('saat', showDate, 'show sayisi', count);
+    console.log(
+      'saat',
+      showDate,
+      'show sayisi',
+      count,
+      'app path: ',
+      app.getAppPath(),
+      'appVersion : ',
+      app.getVersion()
+    );
     if (count === 1 && showDate > 11 && showDate < 14) {
       mainWindow.show();
     } else if (count === 2 && showDate > 15 && showDate < 18) {
