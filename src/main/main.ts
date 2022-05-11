@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 /* eslint-disable no-plusplus */
 /* eslint-disable one-var */
 /* eslint-disable prefer-destructuring */
@@ -75,12 +76,6 @@ const store = new Store();
 //   store.set(key, val);
 // });
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-});
-
 let isAppQuitting = false;
 
 // console.log(hour);
@@ -117,18 +112,17 @@ let isAppQuitting = false;
 // }
 
 let afterRemoveOsName = '';
+let isEmojiClick = false;
+let isBeforeClickEmoji = false;
 
 const osName = os.userInfo().username;
 afterRemoveOsName = osName.slice(2);
 
-ipcMain.on('electron-store-set', async (_event, _key, _val) => {
-  // console.log(key, val, '********');
-  // console.log(afterRemoveOsName, 'main');
-
-  store.set('osUser', afterRemoveOsName);
-});
 store.set('appVersion', app.getVersion());
-ipcMain.on('electron-store-get', async (event, val) => {
+
+ipcMain.on('electron-store-get', (event, val) => {
+  console.log(val, 'store-get');
+
   event.returnValue = store.get(val);
 });
 
@@ -254,6 +248,18 @@ const createWindow = async () => {
     },
   });
 
+  ipcMain.on('electron-store-set', (_event, _key, _val) => {
+    console.log(_key, _val, 'store-set');
+    // console.log(afterRemoveOsName, 'main');
+    if (_key === 'clickEmoji' && _val === true) {
+      isEmojiClick = true;
+      mainWindow.hide();
+    }
+    if (_key === 'beforeClickEmoji') {
+      isBeforeClickEmoji = true;
+    }
+    store.set('osUser', afterRemoveOsName);
+  });
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   // mainWindow.setOverlayIcon('./assets/icons/happyApp.ico', 'Anket Uygulaması');
   // mainWindow.setIcon('./assets/icons/happyApp.ico');
@@ -282,16 +288,26 @@ const createWindow = async () => {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-  mainWindow.on('hide', async () => {
-    console.log(afterRemoveOsName, 'Gizleme fonksiyonu çalıştı.');
-    mainWindow.webContents.send('hideWindow');
+  mainWindow.on('hide', () => {
+    console.log(isEmojiClick, 'Hide fonksiyonunda ki emojiClick');
+
+    if (!isEmojiClick && !isBeforeClickEmoji) {
+      console.log(afterRemoveOsName, 'Gizleme fonksiyonu calisti.');
+
+      mainWindow.webContents.send('hideWindow');
+    }
   });
 
   mainWindow.on('show', function (event: any) {
+    isEmojiClick = false;
+    isBeforeClickEmoji = false;
     count++;
     console.log(count);
+    store.set('count', count);
   });
-
+  store.onDidChange('count', (newValue, oldValue) => {
+    console.log('Did Change', newValue);
+  });
   // new Cron({
   //   cronTime: '0 0 10,15 ? * MON,TUE,WED,THU,FRI *',
   //   onTick: async function () {
@@ -313,7 +329,7 @@ const createWindow = async () => {
 
   // `https://localhost:7038/api/UserInfoAdd?sicilNo=${afterRemoveOsName}`
   // eslint-disable-next-line func-names
-  mainWindow.on('close', async function (event: any) {
+  mainWindow.on('close', function (event: any) {
     if (!isAppQuitting) {
       event.preventDefault();
       mainWindow?.hide();
@@ -383,14 +399,25 @@ app.on('ready', () => {
       'app path: ',
       app.getAppPath(),
       'appVersion : ',
-      app.getVersion()
+      app.getVersion(),
+      'store ondidChange : ',
+      store.get('count')
     );
-    if (count === 1 && showDate > 11 && showDate < 14) {
+
+    var showCounter = store.get('count');
+    console.log(
+      'showCounter degiskeni : ',
+      showCounter,
+      'count degisken : ',
+      count
+    );
+    if (showCounter === 1 && showDate > 11 && showDate < 14) {
       mainWindow.show();
-    } else if (count === 2 && showDate > 15 && showDate < 18) {
+    } else if (showCounter === 2 && showDate > 15 && showDate < 18) {
       mainWindow.show();
-    } else if (count === 3 || showDate > 18) {
+    } else if (showCounter === 3 || showDate > 18) {
       count = 0;
+      store.set('count', count);
     }
   }, 6000);
 });
@@ -398,9 +425,9 @@ app.on('ready', () => {
 let tray;
 const createTray = () => {
   //Prod tray
-  tray = new Tray('resources/assets/happy.ico');
+  //tray = new Tray('resources/assets/happy.ico');
   //developer Tray
-  //tray = new Tray('happyApp.ico');
+  tray = new Tray('happyApp.ico');
   //tray.setImage('./resources/assets/happyApp.ico');
   tray.setToolTip('Anket Uygulaması');
   tray.on('click', () => {

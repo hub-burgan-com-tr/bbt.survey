@@ -1,3 +1,4 @@
+/* eslint-disable no-sequences */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable func-names */
 /* eslint-disable no-plusplus */
@@ -56,6 +57,7 @@ const Hello = () => {
   const [check, setCheck] = useState('');
   const [message, setMessage] = useState('');
   const [user, setUser] = useState<any>();
+  const [counter, setCounter] = useState<any>(0);
   // const [userVote, setUserVote]=useState<any>({
 
   //   department:'',
@@ -122,28 +124,14 @@ const Hello = () => {
     // window.electron.store.myPing();
 
     try {
-      // let ssInterval = setInterval(async () => {
-      //   let isAppClose = window.electron.store.get('appClose');
-      //   console.log(isAppClose, userIdFromData);
-      //   if (isAppClose == true && userIdFromData) {
-      //     window.electron.store.set('appClose', false);
-      //     console.log('isAppClose');
-      //     console.log(user);
-
-      //     const result = await API.USERS_LIST();
-      //     console.log('bankdata', result);
-      //     let postData = {
-      //       department: result.data.divisionName,
-      //       section: result.data.meslekAd,
-      //       Unit: result.data.unitName,
-      //       vote: 0,
-      //       userId: userIdFromData?.id,
-      //       votedate: dateFormat,
-      //     };
-      //     await postVote(postData);
-      //     clearInterval(ssInterval);
-      //   }
-      // }, 5000);
+      let ssInterval = setInterval(async () => {
+        let cc = window.electron.store.get('count');
+        console.log(cc);
+        setCounter(cc);
+        if (cc == 3) {
+          clearInterval(ssInterval);
+        }
+      }, 5000);
 
       postUserInfo();
     } catch (error) {
@@ -192,6 +180,8 @@ const Hello = () => {
       if (result) {
         console.log(result);
         setMessage(result?.data?.message);
+        console.log('---clickEmoji----');
+        //  window.electron.store.set('clickEmoji', true);
       }
     } catch (error) {
       console.log('Post vote işlemi', error);
@@ -201,6 +191,14 @@ const Hello = () => {
   useEffect(() => {
     try {
       if (!!check) {
+        window.electron.store.set('beforeClickEmoji', true);
+
+        setTimeout(() => {
+          window.electron.store.set('clickEmoji', true);
+          console.log('---clickEmoji----');
+
+          setCheck('');
+        }, 2000);
         let postData = {
           department: user.divisionName,
           section: user.meslekAd,
@@ -216,9 +214,14 @@ const Hello = () => {
     }
   }, [check]);
 
+  function handleClick(params: string) {
+    setCheck(params);
+  }
+
   return (
     <div>
       <div>{window.electron.store.get('appVersion')}</div>
+      <div>{counter}</div>
       <div
         style={{
           marginBottom: '2rem',
@@ -241,7 +244,7 @@ const Hello = () => {
       </div>
       <ul className="feedback" id="feedbackClose">
         <li
-          onClick={() => setCheck('sad')}
+          onClick={() => handleClick('sad')}
           className={`sad ${check == 'sad' ? 'active' : ''}`}
         >
           <div>
@@ -257,13 +260,13 @@ const Hello = () => {
           </div>
         </li>
         <li
-          onClick={() => setCheck('ok')}
+          onClick={() => handleClick('ok')}
           className={`ok ${check == 'ok' ? 'active' : ''}`}
         >
           <div></div>
         </li>
         <li
-          onClick={() => setCheck('happy')}
+          onClick={() => handleClick('happy')}
           className={`happy ${check == 'happy' ? 'active' : ''}`}
         >
           <div>

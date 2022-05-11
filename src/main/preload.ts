@@ -11,6 +11,10 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.send('hideWindow', 'test123');
     },
 
+    clickClose() {
+      ipcRenderer.send('emojiClick', 'emojiye tıklandı....');
+    },
+
     on(channel: string, func: (...args: unknown[]) => void) {
       const validChannels = ['ipc-example', 'hideWindow'];
       if (validChannels.includes(channel)) {
@@ -30,6 +34,7 @@ contextBridge.exposeInMainWorld('electron', {
       return ipcRenderer.sendSync('electron-store-get', val);
     },
     set(property: any, val: any) {
+      console.log('sssss', val);
       ipcRenderer.send('electron-store-set', property, val);
     },
     // myPing() {
