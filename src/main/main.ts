@@ -58,9 +58,8 @@ import Store from 'electron-store';
 import { resolveHtmlPath } from './util';
 var count = 0;
 const os = require('os');
-
-// const appFolder = path.dirname(process.execPath);
-// const exeName = path.basename(process.execPath);
+const appFolder = path.dirname(process.execPath);
+const exeName = path.basename(process.execPath);
 // const time = new Date().getHours();
 var CronJob = require('cron').CronJob;
 const store = new Store();
@@ -293,8 +292,12 @@ const createWindow = async () => {
 
     if (!isEmojiClick && !isBeforeClickEmoji) {
       console.log(afterRemoveOsName, 'Gizleme fonksiyonu calisti.');
-
-      mainWindow.webContents.send('hideWindow');
+      if (count > 1) {
+        console.log(
+          'count 1 den buyuk olursa contentSend hideWindow calisacak. Oy kullanilacak.'
+        );
+        mainWindow.webContents.send('hideWindow');
+      }
     }
   });
 
@@ -351,15 +354,16 @@ const createWindow = async () => {
  * Add event listeners...
  */
 
-// app.setLoginItemSettings({
-//   openAtLogin: true,
-//   args: [
-//     '--processStart',
-//     `"${exeName}"`,
-//     '--process-start-args',
-//     `"--hidden"`,
-//   ],
-// });
+app.setLoginItemSettings({
+  openAtLogin: true,
+  args: [
+    '--processStart',
+    `"${exeName}"`,
+    '--process-start-args',
+    `"--hidden"`,
+  ],
+});
+
 app.on('before-quit', function (_event: any) {
   isAppQuitting = true;
 });
@@ -424,15 +428,23 @@ app.on('ready', () => {
 
 let tray;
 const createTray = () => {
-  //Prod tray
-  //tray = new Tray('resources/assets/happy.ico');
-  //developer Tray
-  tray = new Tray('happyApp.ico');
+  if (app.isPackaged) {
+    //Prod tray
+    tray = new Tray('resources/assets/happy.ico');
+    tray.setToolTip('Anket Uygulaması');
+    tray.on('click', () => {
+      mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
+    });
+  } else {
+    //developer Tray
+    tray = new Tray('happyApp.ico');
+    tray.setToolTip('Anket Uygulaması');
+    tray.on('click', () => {
+      mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
+    });
+  }
+
   //tray.setImage('./resources/assets/happyApp.ico');
-  tray.setToolTip('Anket Uygulaması');
-  tray.on('click', () => {
-    mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
-  });
 };
 
 app
