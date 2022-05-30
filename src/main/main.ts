@@ -305,7 +305,7 @@ const createWindow = async () => {
     isEmojiClick = false;
     isBeforeClickEmoji = false;
     count++;
-    console.log(count);
+    console.log(count,isEmojiClick,isBeforeClickEmoji);
     store.set('count', count);
   });
   store.onDidChange('count', (newValue, oldValue) => {
@@ -380,6 +380,8 @@ app.on('ready', () => {
   //autoUpdater.checkForUpdatesAndNotify();
   app.hasSingleInstanceLock();
   //initTray();
+  
+  
 
   electron.powerMonitor.on('resume', () => {
     console.log('The system is going to resume');
@@ -391,6 +393,22 @@ app.on('ready', () => {
 
   electron.powerMonitor.on('suspend', () => {
     console.log('The system is going to on suspend');
+
+    // var suspendInterval:any =setInterval(()=>{
+    //   let suspendDate=new Date().getHours();
+    //   console.log(suspendDate)
+    //   if(suspendDate>=15){
+    //     count=0;
+    //   }
+    // },600000)
+
+    // setTimeout(() => {
+    //   let suspendDate=new Date().getHours();
+    //   console.log(suspendDate)
+    //   if(suspendDate>=15){
+    //     count=0;
+    //   }
+    // });
   });
 
   var timeInterval: any = setInterval(() => {
