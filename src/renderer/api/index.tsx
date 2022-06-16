@@ -15,7 +15,7 @@ export const API = Object.freeze({
   USERS_LIST: async (): Promise<any> =>
     await api.get('api/IKDb?sicilNo=' + userSicil),
   USERS_POST: async (data: any): Promise<any> =>
-    await api.post('api/usertest', data),
+    await api.post('api/Vote', data),
   USERS_POSTINFO: async (data: any): Promise<any> =>
     await api.post('api/UserInfoAdd', data),
   USERS_INFOLIST: async (): Promise<any> =>

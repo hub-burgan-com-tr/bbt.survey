@@ -293,11 +293,10 @@ const createWindow = async () => {
     if (!isEmojiClick && !isBeforeClickEmoji) {
       console.log(afterRemoveOsName, 'Gizleme fonksiyonu calisti.');
       if (count > 1) {
-        console.log(
-          'count 1 den buyuk olursa contentSend hideWindow calisacak. Oy kullanilacak.'
-        );
+        console.log('count 1 den buyuk olursa contentSend hideWindow calisacak. Oy kullanilacak.');
         mainWindow.webContents.send('hideWindow');
       }
+     
     }
   });
 
@@ -354,15 +353,15 @@ const createWindow = async () => {
  * Add event listeners...
  */
 
-app.setLoginItemSettings({
-  openAtLogin: true,
-  args: [
-    '--processStart',
-    `"${exeName}"`,
-    '--process-start-args',
-    `"--hidden"`,
-  ],
-});
+// app.setLoginItemSettings({
+//   openAtLogin: true,
+//   args: [
+//     '--processStart',
+//     `"${exeName}"`,
+//     '--process-start-args',
+//     `"--hidden"`,
+//   ],
+// });
 
 app.on('before-quit', function (_event: any) {
   isAppQuitting = true;
@@ -411,38 +410,39 @@ app.on('ready', () => {
     // });
   });
 
-  var timeInterval: any = setInterval(() => {
-    let showDate = new Date().getHours();
-    console.log(
-      'saat',
-      showDate,
-      'show sayisi',
-      count,
-      'app path: ',
-      app.getAppPath(),
-      'appVersion : ',
-      app.getVersion(),
-      'store ondidChange : ',
-      store.get('count')
-    );
+  // var timeInterval: any = setInterval(() => {
+  //   let showDate = new Date().getHours();
+  //   console.log(
+  //     'saat',
+  //     showDate,
+  //     'show sayisi',
+  //     count,
+  //     'app path: ',
+  //     app.getAppPath(),
+  //     'appVersion : ',
+  //     app.getVersion(),
+  //     'store ondidChange : ',
+  //     store.get('count')
+  //   );
 
-    var showCounter = store.get('count');
-    console.log(
-      'showCounter degiskeni : ',
-      showCounter,
-      'count degisken : ',
-      count
-    );
-    if (showCounter === 1 && showDate > 11 && showDate < 14) {
-      mainWindow.show();
-    } else if (showCounter === 2 && showDate > 15 && showDate < 18) {
-      mainWindow.show();
-    } else if (showCounter === 3 || showDate > 18) {
-      count = 0;
-      store.set('count', count);
-    }
-  }, 6000);
+  //   var showCounter = store.get('count');
+  //   console.log(
+  //     'showCounter degiskeni : ',
+  //     showCounter,
+  //     'count degisken : ',
+  //     count
+  //   );
+  //   if (showCounter === 1 && showDate > 11 && showDate < 14) {
+  //     mainWindow.show();
+  //   } else if (showCounter === 2 && showDate > 15 && showDate < 18) {
+  //     mainWindow.show();
+  //   } else if (showCounter === 3 || showDate > 18) {
+  //     count = 0;
+  //     store.set('count', count);
+  //   }
+  // }, 6000);
 });
+
 
 let tray;
 const createTray = () => {
