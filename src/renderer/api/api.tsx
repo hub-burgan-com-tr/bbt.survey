@@ -1,7 +1,7 @@
 /* eslint-disable import/newline-after-import */
 /* eslint-disable prettier/prettier */
 import axios from 'axios';
-const BASE_URL = 'https://test-survey.burgan.com.tr/';
+const BASE_URL = 'https://localhost:7038/';
 
 const instance = axios.create({
   baseURL: BASE_URL,

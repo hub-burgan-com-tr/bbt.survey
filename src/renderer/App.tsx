@@ -103,6 +103,8 @@ const Hello = () => {
         department: resultUser?.divisionName,
         section: resultUser?.gorevAd,
         unit: resultUser?.unitName,
+        VoteDate:new Date(),
+        VoteLimit:0
       };
       console.log(resultUser, userInfo);
       const result = await API.USERS_POSTINFO(userInfo);
@@ -119,20 +121,28 @@ const Hello = () => {
     }
   }
 
+  if(onlineInfo()==true){
+    let getUserTimeout=setTimeout(() => {
+      getUserFromBankData();
+    }, 3000);
+    clearTimeout(getUserTimeout)
+  }
+  
+
   useEffect(() => {
-    if (userIdFromData?.id) {
+    if (userIdFromData?.userId) {
       window.electron.ipcRenderer.on('hideWindow', async (value: any) => {
-        console.log('asdasf');
+        console.log('hideWindow post');
         const result = await API.USERS_LIST();
         console.log('bankdata', result);
-        if (!result.data) {
-          console.log(userIdFromData, 'aasdad');
+        if (result.data) {
+          console.log(userIdFromData, 'hideWindow userIdFromData',result.data);
           let postData = {
             department: result.data.divisionName,
             section: result.data.meslekAd,
             Unit: result.data.unitName,
             date:new Date(),
-            vote: 0,
+            userVote: 0,
             userId: userIdFromData?.userId,
             votedate: dateFormat,
           };
@@ -207,6 +217,7 @@ const Hello = () => {
       }
     } catch (error) {
       console.log('Post vote işlemi', error);
+      console.log(user)
     }
   }
 
@@ -226,7 +237,7 @@ const Hello = () => {
           department: user.divisionName,
           section: user.meslekAd,
           Unit: user.unitName,
-          vote: checkVote[check],
+          userVote: checkVote[check],
           userId: userIdFromData.userId,
           date:new Date(),
           votedate: dateFormat,
@@ -235,6 +246,7 @@ const Hello = () => {
       }
     } catch (error) {
       console.log('Use effect vote post işlemi', error);
+      
     }
   }, [check]);
 
