@@ -184,8 +184,7 @@ const Hello = () => {
   // });
 
   async function getUserFromBankData(): Promise<any> {
-    if (onlineInfo()) {
-      setTimeout(async () => {
+
         try {
           const result = await API.USERS_LIST();
           console.log('bankdata', result);
@@ -206,8 +205,6 @@ const Hello = () => {
         } catch (error) {
           console.log('Banka tablosundan kullanıcı bilgisi çekme', error);
         }
-      }, 10000);
-    }
   }
 
   async function postVote(params: any) {
