@@ -29,11 +29,11 @@ import { useEffect, useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { API } from './api';
-import { Offline, Online } from "react-detect-offline";
+import { Offline, Online } from 'react-detect-offline';
 
-import useOnline from 'use-online'
+import useOnline from 'use-online';
 var dateFormat = new Date().toISOString().slice(0, 10);
-var date=new Date();
+var date = new Date();
 console.log(dateFormat);
 console.log(window.electron.store.get('osUser'), 'Rendererda ki store islemi');
 
@@ -64,20 +64,20 @@ const Hello = () => {
   const [message, setMessage] = useState('');
   const [user, setUser] = useState<any>();
   const [counter, setCounter] = useState<any>(0);
-  const [ online, setOnline ] = useState(window.navigator.onLine)
+  const [online, setOnline] = useState(window.navigator.onLine);
 
   useEffect(() => {
-    const handleOnline = () => setOnline(true)
-    const handleOffline = () => setOnline(false)
+    const handleOnline = () => setOnline(true);
+    const handleOffline = () => setOnline(false);
 
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [])
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
   // const [userVote, setUserVote]=useState<any>({
 
   //   department:'',
@@ -111,8 +111,8 @@ const Hello = () => {
       console.log('PostUserInfo fonksiyonu', result);
 
       setUserIdFromdata(result?.data?.data);
-      console.log(date)
-      console.log(userInfo,'Postuserinfo result data data',result.data.data);
+      console.log(date);
+      console.log(userInfo, 'Postuserinfo result data data', result.data.data);
       if (result) {
         setMessage(result.data?.message);
       }
@@ -184,25 +184,29 @@ const Hello = () => {
   // });
 
   async function getUserFromBankData(): Promise<any> {
-    try {
-      const result = await API.USERS_LIST();
-      console.log('bankdata', result);
-      setUser({
-        divisionName: result?.data?.divisionName,
-        firstName: result?.data?.firstName,
-        sicilNo: result?.data?.sicilNo,
-        meslekAd: result?.data?.meslekAd,
-        unitName: result?.data?.unitName,
-        id: null,
-      });
+    if (onlineInfo()) {
+      setTimeout(async () => {
+        try {
+          const result = await API.USERS_LIST();
+          console.log('bankdata', result);
+          setUser({
+            divisionName: result?.data?.divisionName,
+            firstName: result?.data?.firstName,
+            sicilNo: result?.data?.sicilNo,
+            meslekAd: result?.data?.meslekAd,
+            unitName: result?.data?.unitName,
+            id: null,
+          });
 
-      if (result) {
-        setMessage(result?.data?.message);
-        return result?.data;
-      }
-      return null;
-    } catch (error) {
-      console.log('Banka tablosundan kullanıcı bilgisi çekme', error);
+          if (result) {
+            setMessage(result?.data?.message);
+            return result?.data;
+          }
+          return null;
+        } catch (error) {
+          console.log('Banka tablosundan kullanıcı bilgisi çekme', error);
+        }
+      }, 10000);
     }
   }
 
@@ -229,7 +233,7 @@ const Hello = () => {
         setTimeout(() => {
           window.electron.store.set('clickEmoji', true);
           console.log('---clickEmoji----');
-          console.log('postvote user bilgisi',user)
+          console.log('postvote user bilgisi', user);
 
           setCheck('');
         }, 2000);
@@ -239,7 +243,7 @@ const Hello = () => {
           Unit: user.unitName,
           userVote: checkVote[check],
           userId: userIdFromData.userId,
-          date:new Date(),
+          date: new Date(),
           votedate: dateFormat,
         };
         postVote(postData);
@@ -254,25 +258,25 @@ const Hello = () => {
     setCheck(params);
   }
 
-  function onlineInfo(){
-    const online=useOnline;
+  function onlineInfo() {
+    const online = useOnline;
 
-    var onlineEvent=online() ? onlineDetection=true:onlineDetection=false;
-    console.log(onlineEvent,'onlinevent','Navigator : ',navigator.onLine)
+    var onlineEvent = online()
+      ? (onlineDetection = true)
+      : (onlineDetection = false);
+    console.log(onlineEvent, 'onlinevent', 'Navigator : ', navigator.onLine);
     return onlineEvent;
   }
-
 
   return (
     <div>
       <div>{window.electron.store.get('appVersion')}</div>
-      <div>{counter}</div>
       <div>
-    <Online>🟢</Online>
-    <Offline>🔴</Offline>
-  </div>
-  <div>{online}</div>
-  <div>{onlineInfo()}</div>
+        <Online>🟢</Online>
+        <Offline>🔴</Offline>
+      </div>
+      <div>{online}</div>
+      <div>{onlineInfo()}</div>
       <div
         style={{
           marginBottom: '2rem',
