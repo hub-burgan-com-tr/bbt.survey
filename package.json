@@ -9,7 +9,7 @@
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
-    "package": "set GH_TOKEN=abcde && ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never",
+    "package": "set GH_TOKEN=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 && ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish always",
     "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts && opencollective-postinstall",
     "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
     "start:main": "cross-env NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
@@ -35,7 +35,7 @@
   "build": {
     "productName": "Burgan Bank Anket",
     "appId": "org.erb.Personel Anket",
-    "asar": true,
+    "asar": false,
     "asarUnpack": "**\\*.{node,dll}",
     "buildVersion": "0.0.1",
     "icon": "assets/icons/happyApp.ico",
@@ -105,7 +105,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hub-burgan-com-tr/bbt.survey.app.git"
+    "url": "git+https://github.com/hub-burgan-com-tr/bbt.survey.ui.git"
   },
   "keywords": [
     "electron",
@@ -118,7 +118,7 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/hub-burgan-com-tr/bbt.survey.app",
+  "homepage": "https://github.com/hub-burgan-com-tr/bbt.survey.ui",
   "jest": {
     "testURL": "http://localhost/",
     "testEnvironment": "jsdom",

@@ -66,18 +66,18 @@ const Hello = () => {
   const [counter, setCounter] = useState<any>(0);
   const [online, setOnline] = useState(window.navigator.onLine);
 
-  useEffect(() => {
-    const handleOnline = () => setOnline(true);
-    const handleOffline = () => setOnline(false);
+  // useEffect(() => {
+  //   const handleOnline = () => setOnline(true);
+  //   const handleOffline = () => setOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+  //   window.addEventListener('online', handleOnline);
+  //   window.addEventListener('offline', handleOffline);
 
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener('online', handleOnline);
+  //     window.removeEventListener('offline', handleOffline);
+  //   };
+  // }, []);
   // const [userVote, setUserVote]=useState<any>({
 
   //   department:'',
@@ -103,8 +103,8 @@ const Hello = () => {
         department: resultUser?.divisionName,
         section: resultUser?.gorevAd,
         unit: resultUser?.unitName,
-        VoteDate:new Date(),
-        VoteLimit:0
+        VoteDate: new Date(),
+        VoteLimit: 0,
       };
       console.log(resultUser, userInfo);
       const result = await API.USERS_POSTINFO(userInfo);
@@ -121,13 +121,30 @@ const Hello = () => {
     }
   }
 
-  if(onlineInfo()==true){
-    let getUserTimeout=setTimeout(() => {
-      getUserFromBankData();
-    }, 3000);
-    clearTimeout(getUserTimeout)
-  }
-  
+  // setInterval(() => {
+  //   postUserInfo();
+  //   console.log('interval');
+  // }, 3000);
+
+  // function onlineEventDetector() {
+  //   if (onlineInfo()) {
+  //     postUserInfo();
+  //     console.log('Online Event Detector post işlemi...');
+  //   }
+  // }
+
+  // setInterval(() => {
+  //   console.log('Navigator Interval', window.navigator.onLine);
+  // }, 3000);
+
+  // if (onlineInfo() == true) {
+  //   let getUserTimeout = setTimeout(() => {
+  //     // postUserInfo();
+  //     // console.log('SetTimeout');
+  //     onlineEventDetector();
+  //   }, 3000);
+  //   clearTimeout(getUserTimeout);
+  // }
 
   useEffect(() => {
     if (userIdFromData?.userId) {
@@ -136,12 +153,12 @@ const Hello = () => {
         const result = await API.USERS_LIST();
         console.log('bankdata', result);
         if (result.data) {
-          console.log(userIdFromData, 'hideWindow userIdFromData',result.data);
+          console.log(userIdFromData, 'hideWindow userIdFromData', result.data);
           let postData = {
             department: result.data.divisionName,
             section: result.data.meslekAd,
             Unit: result.data.unitName,
-            date:new Date(),
+            date: new Date(),
             userVote: 0,
             userId: userIdFromData?.userId,
             votedate: dateFormat,
@@ -156,6 +173,14 @@ const Hello = () => {
     // window.electron.store.myPing();
 
     try {
+      console.log(
+        'Window Show eventi gerceklestiginde user bilgisini getirecek...'
+      );
+      window.electron.ipcRenderer.on('mainToPost', () => {
+        console.log('maintopost');
+
+        postUserInfo();
+      });
       let ssInterval = setInterval(async () => {
         let cc = window.electron.store.get('count');
         console.log(cc);
@@ -165,7 +190,7 @@ const Hello = () => {
         }
       }, 5000);
 
-      postUserInfo();
+      //postUserInfo();
     } catch (error) {
       console.log('Use effect tabloya kullanıcı bilgisi yollama', error);
     }
@@ -184,27 +209,27 @@ const Hello = () => {
   // });
 
   async function getUserFromBankData(): Promise<any> {
+    try {
+      const result = await API.USERS_LIST();
+      console.log('bankdata', result);
 
-        try {
-          const result = await API.USERS_LIST();
-          console.log('bankdata', result);
-          setUser({
-            divisionName: result?.data?.divisionName,
-            firstName: result?.data?.firstName,
-            sicilNo: result?.data?.sicilNo,
-            meslekAd: result?.data?.meslekAd,
-            unitName: result?.data?.unitName,
-            id: null,
-          });
+      setUser({
+        divisionName: result?.data?.divisionName,
+        firstName: result?.data?.firstName,
+        sicilNo: result?.data?.sicilNo,
+        meslekAd: result?.data?.meslekAd,
+        unitName: result?.data?.unitName,
+        id: null,
+      });
 
-          if (result) {
-            setMessage(result?.data?.message);
-            return result?.data;
-          }
-          return null;
-        } catch (error) {
-          console.log('Banka tablosundan kullanıcı bilgisi çekme', error);
-        }
+      if (result) {
+        setMessage(result?.data?.message);
+        return result?.data;
+      }
+      return null;
+    } catch (error) {
+      console.log('Banka tablosundan kullanıcı bilgisi çekme', error);
+    }
   }
 
   async function postVote(params: any) {
@@ -218,7 +243,7 @@ const Hello = () => {
       }
     } catch (error) {
       console.log('Post vote işlemi', error);
-      console.log(user)
+      console.log(user);
     }
   }
 
@@ -247,7 +272,6 @@ const Hello = () => {
       }
     } catch (error) {
       console.log('Use effect vote post işlemi', error);
-      
     }
   }, [check]);
 

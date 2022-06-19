@@ -52,6 +52,7 @@ import electron, {
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import fetch from 'electron-fetch';
 
 import Store from 'electron-store';
 
@@ -293,18 +294,21 @@ const createWindow = async () => {
     if (!isEmojiClick && !isBeforeClickEmoji) {
       console.log(afterRemoveOsName, 'Gizleme fonksiyonu calisti.');
       if (count > 1) {
-        console.log('count 1 den buyuk olursa contentSend hideWindow calisacak. Oy kullanilacak.');
+        console.log(
+          'count 1 den buyuk olursa contentSend hideWindow calisacak. Oy kullanilacak.'
+        );
         mainWindow.webContents.send('hideWindow');
       }
-     
     }
   });
 
   mainWindow.on('show', function (event: any) {
     isEmojiClick = false;
     isBeforeClickEmoji = false;
+
+    mainWindow.webContents.send('mainToPost');
     count++;
-    console.log(count,isEmojiClick,isBeforeClickEmoji);
+    console.log(count, isEmojiClick, isBeforeClickEmoji);
     store.set('count', count);
   });
   store.onDidChange('count', (newValue, oldValue) => {
@@ -317,11 +321,20 @@ const createWindow = async () => {
   //     start: true;
   //   },
   // });
+
   var job = new CronJob(
-    '00 11,15 * * *',
+    '16 11,23 * * *',
     async function () {
+      let healtyCheckInterval = setInterval(async () => {
+        let result: any = await fetch('https://localhost:7038/api/HealtyCheck');
+        console.log(result.status);
+        if (result.status === 200) {
+          clearInterval(healtyCheckInterval);
+          mainWindow.show();
+        }
+      }, 5000);
+
       console.log('You will see this message every second', "15'te çalıştı");
-      mainWindow.show();
     },
     null,
     true,
@@ -329,7 +342,6 @@ const createWindow = async () => {
   );
   job.start();
 
-  // `https://localhost:7038/api/UserInfoAdd?sicilNo=${afterRemoveOsName}`
   // eslint-disable-next-line func-names
   mainWindow.on('close', function (event: any) {
     if (!isAppQuitting) {
@@ -353,15 +365,15 @@ const createWindow = async () => {
  * Add event listeners...
  */
 
-// app.setLoginItemSettings({
-//   openAtLogin: true,
-//   args: [
-//     '--processStart',
-//     `"${exeName}"`,
-//     '--process-start-args',
-//     `"--hidden"`,
-//   ],
-// });
+app.setLoginItemSettings({
+  openAtLogin: true,
+  args: [
+    '--processStart',
+    `"${exeName}"`,
+    '--process-start-args',
+    `"--hidden"`,
+  ],
+});
 
 app.on('before-quit', function (_event: any) {
   isAppQuitting = true;
@@ -379,8 +391,6 @@ app.on('ready', () => {
   //autoUpdater.checkForUpdatesAndNotify();
   app.hasSingleInstanceLock();
   //initTray();
-  
-  
 
   electron.powerMonitor.on('resume', () => {
     console.log('The system is going to resume');
@@ -442,7 +452,6 @@ app.on('ready', () => {
   //   }
   // }, 6000);
 });
-
 
 let tray;
 const createTray = () => {

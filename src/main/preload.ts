@@ -11,12 +11,16 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.send('hideWindow', 'test123');
     },
 
+    mainToPost() {
+      ipcRenderer.send('mainToPost', 'test123');
+    },
+
     clickClose() {
       ipcRenderer.send('emojiClick', 'emojiye tıklandı....');
     },
 
     on(channel: string, func: (...args: unknown[]) => void) {
-      const validChannels = ['ipc-example', 'hideWindow'];
+      const validChannels = ['ipc-example', 'hideWindow', 'mainToPost'];
       if (validChannels.includes(channel)) {
         const subscription = (_event: IpcRendererEvent, ...args: unknown[]) =>
           func(...args);
