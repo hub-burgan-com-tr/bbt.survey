@@ -332,7 +332,7 @@ const createWindow = async () => {
           clearInterval(healtyCheckInterval);
           mainWindow.show();
         }
-      }, 5000);
+      }, 30000);
 
       console.log('You will see this message every second', "15'te çalıştı");
     },
