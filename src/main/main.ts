@@ -118,6 +118,9 @@ let isBeforeClickEmoji = false;
 const osName = os.userInfo().username;
 afterRemoveOsName = osName.slice(2);
 
+store.set('osUser', afterRemoveOsName);
+console.log('osUser::::', afterRemoveOsName);
+
 store.set('appVersion', app.getVersion());
 
 ipcMain.on('electron-store-get', (event, val) => {
@@ -142,7 +145,7 @@ ipcMain.on('electron-store-get', (event, val) => {
 
 export default class AppUpdater {
   constructor() {
-    // const server = 'https://github.com/yarasaa/anket-app';
+    // const server = 'https://g...content-available-to-author-only...b.com/yarasaa/anket-app';
     // const url = `${server}/releases/tag/${app.getVersion()}`;
     log.transports.file.level = 'info';
     // autoUpdater.setFeedURL(url);
@@ -235,8 +238,8 @@ const createWindow = async () => {
     alwaysOnTop: true,
     opacity: 0.9,
     titleBarStyle: 'default',
-    x: screen.getPrimaryDisplay().workAreaSize.width - 450,
-    y: screen.getPrimaryDisplay().workAreaSize.height - 300,
+    x: screen.getPrimaryDisplay().workAreaSize.width - 443,
+    y: screen.getPrimaryDisplay().workAreaSize.height - 293,
 
     webPreferences: {
       preload: app.isPackaged
@@ -258,8 +261,20 @@ const createWindow = async () => {
     if (_key === 'beforeClickEmoji') {
       isBeforeClickEmoji = true;
     }
-    store.set('osUser', afterRemoveOsName);
   });
+
+  // function findOsUser() {
+  //   let interval = setInterval(() => {
+  //     console.log('osus222er:::::', afterRemoveOsName);
+
+  //     if (afterRemoveOsName) {
+  //       console.log('osuser:::::', afterRemoveOsName);
+  //       store.set('osUser', afterRemoveOsName);
+  //       clearInterval(interval);
+  //     }
+  //   }, 1000);
+  // }
+
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   // mainWindow.setOverlayIcon('./assets/icons/happyApp.ico', 'Anket Uygulaması');
   // mainWindow.setIcon('./assets/icons/happyApp.ico');
@@ -323,10 +338,12 @@ const createWindow = async () => {
   // });
 
   var job = new CronJob(
-    '16 11,23 * * *',
+    '00 11,15 * * *',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
-        let result: any = await fetch('https://localhost:7038/api/HealtyCheck');
+        let result: any = await fetch(
+          'https://test-survey.burgan.com.tr/api/HealtyCheck'
+        );
         console.log(result.status);
         if (result.status === 200) {
           clearInterval(healtyCheckInterval);

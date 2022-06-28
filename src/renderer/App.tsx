@@ -30,8 +30,6 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { API } from './api';
 import { Offline, Online } from 'react-detect-offline';
-
-import useOnline from 'use-online';
 var dateFormat = new Date().toISOString().slice(0, 10);
 var date = new Date();
 console.log(dateFormat);
@@ -95,26 +93,36 @@ const Hello = () => {
   const [userIdFromData, setUserIdFromdata] = useState<any>();
 
   async function postUserInfo() {
-    //console.log(result)
-    try {
-      let resultUser = await getUserFromBankData();
-      let userInfo = {
-        UserId: window.electron.store.get('osUser') || '',
-        department: resultUser?.divisionName,
-        section: resultUser?.gorevAd,
-        unit: resultUser?.unitName,
-        VoteDate: new Date(),
-        VoteLimit: 0,
-      };
-      console.log(resultUser, userInfo);
-      const result = await API.USERS_POSTINFO(userInfo);
-      console.log('PostUserInfo fonksiyonu', result);
+    console.log('before');
 
-      setUserIdFromdata(result?.data?.data);
-      console.log(date);
-      console.log(userInfo, 'Postuserinfo result data data', result.data.data);
-      if (result) {
-        setMessage(result.data?.message);
+    try {
+      let isUser = window.electron.store.get('osUser');
+      if (!!isUser) {
+        let resultUser = await getUserFromBankData();
+        let userInfo = {
+          UserId: isUser || '',
+          department: resultUser?.divisionName,
+          section: resultUser?.gorevAd,
+          unit: resultUser?.unitName,
+          VoteDate: new Date(),
+          VoteLimit: 0,
+        };
+        console.log(resultUser, userInfo);
+        await delay(5000);
+        console.log('after delay');
+        const result = await API.USERS_POSTINFO(userInfo);
+        console.log('PostUserInfo fonksiyonu', result);
+
+        setUserIdFromdata(result?.data?.data);
+        console.log(date);
+        console.log(
+          userInfo,
+          'Postuserinfo result data data',
+          result.data.data
+        );
+        // if (result) {
+        //   setMessage(result.data?.message);
+        // }
       }
     } catch (error) {
       console.log('User bilgisi post hatası', error);
@@ -176,6 +184,7 @@ const Hello = () => {
       console.log(
         'Window Show eventi gerceklestiginde user bilgisini getirecek...'
       );
+
       window.electron.ipcRenderer.on('mainToPost', () => {
         console.log('maintopost');
 
@@ -279,16 +288,6 @@ const Hello = () => {
     setCheck(params);
   }
 
-  function onlineInfo() {
-    const online = useOnline;
-
-    var onlineEvent = online()
-      ? (onlineDetection = true)
-      : (onlineDetection = false);
-    console.log(onlineEvent, 'onlinevent', 'Navigator : ', navigator.onLine);
-    return onlineEvent;
-  }
-
   return (
     <div>
       <div>{window.electron.store.get('appVersion')}</div>
@@ -296,8 +295,6 @@ const Hello = () => {
         <Online>🟢</Online>
         <Offline>🔴</Offline>
       </div>
-      <div>{online}</div>
-      <div>{onlineInfo()}</div>
       <div
         style={{
           marginBottom: '2rem',
@@ -313,7 +310,7 @@ const Hello = () => {
             fontFamily: 'sans-serif',
           }}
         >
-          Merhaba , {user?.firstName}
+          Merhaba, {user?.firstName}
         </span>
         <br></br>
         Bugün kendini nasıl hissediyorsun?
@@ -367,12 +364,19 @@ const Hello = () => {
         {message}
       </div>
 
-      <svg xmlns="http://www.w3.org/2000/svg" style={{ display: 'none' }}>
-        <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 4" id="eye">
+      <svg
+        xmlns="http://w...content-available-to-author-only...3.org/2000/svg"
+        style={{ display: 'none' }}
+      >
+        <symbol
+          xmlns="http://w...content-available-to-author-only...3.org/2000/svg"
+          viewBox="0 0 7 4"
+          id="eye"
+        >
           <path d="M1,1 C1.83333333,2.16666667 2.66666667,2.75 3.5,2.75 C4.33333333,2.75 5.16666667,2.16666667 6,1" />
         </symbol>
         <symbol
-          xmlns="http://www.w3.org/2000/svg"
+          xmlns="http://w...content-available-to-author-only...3.org/2000/svg"
           viewBox="0 0 18 7"
           id="mouth"
         >
