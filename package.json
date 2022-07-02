@@ -38,7 +38,6 @@
     "asar": false,
     "asarUnpack": "**\\*.{node,dll}",
     "buildVersion": "0.0.1",
-    "icon": "assets/icons/happyApp.ico",
     "files": [
       "dist",
       "node_modules",
