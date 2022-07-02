@@ -163,38 +163,38 @@ export default class AppUpdater {
 
     autoUpdater.autoDownload = true;
     console.log("App updater'a girdi...");
-    autoUpdater.on('update-available', (event, releaseName, releaseNotes) => {
-      dialog.showMessageBox({
-        type: 'info',
-        title: 'Yeni Güncelleme',
-        message: `Yeni güncelleme mevcut, ${releaseName},${releaseName} sürümü yüklenecek.`,
-      });
-    });
+    // autoUpdater.on('update-available', (event, releaseName, releaseNotes) => {
+    //   dialog.showMessageBox({
+    //     type: 'info',
+    //     title: 'Yeni Güncelleme',
+    //     message: `Yeni güncelleme mevcut, ${releaseName},${releaseName} sürümü yüklenecek.`,
+    //   });
+    // });
     autoUpdater.checkForUpdates();
   }
 }
 
-autoUpdater.checkForUpdatesAndNotify();
-autoUpdater.downloadUpdate();
-autoUpdater.on('update-downloaded', (info) => {
-  autoUpdater.autoInstallOnAppQuit = true;
-  autoUpdater.quitAndInstall();
-});
+// autoUpdater.checkForUpdatesAndNotify();
+// autoUpdater.downloadUpdate();
+// autoUpdater.on('update-downloaded', (info) => {
+//   autoUpdater.autoInstallOnAppQuit = true;
+//   autoUpdater.quitAndInstall();
+// });
 
-autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
-  const dialogOpts = {
-    type: 'info',
-    buttons: ['Restart', 'Later'],
-    title: 'Application Update',
-    message: process.platform === 'win32' ? releaseNotes : releaseName,
-    detail:
-      'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
-  };
+// autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+//   const dialogOpts = {
+//     type: 'info',
+//     buttons: ['Restart', 'Later'],
+//     title: 'Application Update',
+//     message: process.platform === 'win32' ? releaseNotes : releaseName,
+//     detail:
+//       'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
+//   };
 
-  dialog.showMessageBox(dialogOpts).then((returnValue) => {
-    if (returnValue.response === 0) autoUpdater.quitAndInstall();
-  });
-});
+//   dialog.showMessageBox(dialogOpts).then((returnValue) => {
+//     if (returnValue.response === 0) autoUpdater.quitAndInstall();
+//   });
+// });
 
 // autoUpdater.on('error', (message) => {
 //   console.error('There was a problem updating the application');
@@ -380,6 +380,52 @@ const createWindow = async () => {
     'Europe/Minsk'
   );
   job.start();
+
+  var autoUpdateJob = new CronJob(
+    '* * * * *',
+    async function () {
+      let healtyCheckInterval = setInterval(async () => {
+        let result: any = await fetch(
+          'https://test-survey.burgan.com.tr/api/HealtyCheck'
+        );
+        console.log(result.status);
+        if (result.status === 200) {
+          clearInterval(healtyCheckInterval);
+          autoUpdater.checkForUpdatesAndNotify();
+          autoUpdater.downloadUpdate();
+          autoUpdater.on('update-downloaded', (info) => {
+            autoUpdater.autoInstallOnAppQuit = true;
+            autoUpdater.quitAndInstall();
+          });
+
+          autoUpdater.on(
+            'update-downloaded',
+            (event, releaseNotes, releaseName) => {
+              const dialogOpts = {
+                type: 'info',
+                buttons: ['Restart', 'Later'],
+                title: 'Application Update',
+                message:
+                  process.platform === 'win32' ? releaseNotes : releaseName,
+                detail:
+                  'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
+              };
+
+              dialog.showMessageBox(dialogOpts).then((returnValue) => {
+                if (returnValue.response === 0) autoUpdater.quitAndInstall();
+              });
+            }
+          );
+        }
+      }, 30000);
+
+      console.log('You will see this message every second', "15'te çalıştı");
+    },
+    null,
+    true,
+    'Europe/Minsk'
+  );
+  autoUpdateJob.start();
 
   // eslint-disable-next-line func-names
   mainWindow.on('close', function (event: any) {
