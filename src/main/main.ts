@@ -49,6 +49,7 @@ import electron, {
   Tray,
   ipcMain,
   screen,
+  dialog,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -129,6 +130,11 @@ ipcMain.on('electron-store-get', (event, val) => {
   event.returnValue = store.get(val);
 });
 
+function sendStatusToWindow(text: any) {
+  log.info(text);
+  mainWindow.webContents.send('message', text);
+}
+
 // function startNotifyTimerPM() {
 //   var timeInterval: any = setInterval(() => {
 //     const pcTime = new Date();
@@ -158,21 +164,27 @@ export default class AppUpdater {
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
+autoUpdater.checkForUpdatesAndNotify();
+autoUpdater.downloadUpdate();
+autoUpdater.on('update-downloaded', (info) => {
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.quitAndInstall();
+});
 
-// autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
-//   const dialogOpts = {
-//     type: 'info',
-//     buttons: ['Restart', 'Later'],
-//     title: 'Application Update',
-//     message: process.platform === 'win32' ? releaseNotes : releaseName,
-//     detail:
-//       'A new version has been downloaded. Restart the application to apply the updates.',
-//   };
+autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+  const dialogOpts = {
+    type: 'info',
+    buttons: ['Restart', 'Later'],
+    title: 'Application Update',
+    message: process.platform === 'win32' ? releaseNotes : releaseName,
+    detail:
+      'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
+  };
 
-//   dialog.showMessageBox(dialogOpts).then((returnValue) => {
-//     if (returnValue.response === 0) autoUpdater.quitAndInstall();
-//   });
-// });
+  dialog.showMessageBox(dialogOpts).then((returnValue) => {
+    if (returnValue.response === 0) autoUpdater.quitAndInstall();
+  });
+});
 
 // autoUpdater.on('error', (message) => {
 //   console.error('There was a problem updating the application');

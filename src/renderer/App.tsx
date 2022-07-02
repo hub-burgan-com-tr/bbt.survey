@@ -352,7 +352,6 @@ const Hello = () => {
           </div>
         </li>
       </ul>
-
       <div
         style={{
           marginTop: '1.5rem',
@@ -363,7 +362,6 @@ const Hello = () => {
       >
         {message}
       </div>
-
       <svg
         xmlns="http://w...content-available-to-author-only...3.org/2000/svg"
         style={{ display: 'none' }}
