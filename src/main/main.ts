@@ -1,3 +1,4 @@
+/* eslint-disable no-sequences */
 /* eslint-disable no-constant-condition */
 /* eslint-disable no-plusplus */
 /* eslint-disable one-var */
@@ -162,11 +163,11 @@ export default class AppUpdater {
 
     autoUpdater.autoDownload = true;
     console.log("App updater'a girdi...");
-    autoUpdater.on('update-available', (releaseName) => {
+    autoUpdater.on('update-available', (event, releaseName, releaseNotes) => {
       dialog.showMessageBox({
         type: 'info',
         title: 'Yeni Güncelleme',
-        message: `Yeni güncelleme mevcut, ${releaseName} sürümü yüklenecek.`,
+        message: `Anket uygulamasının yeni versiyonu mevcut, ${releaseName},${releaseNotes} sürümü yüklenecek.`,
       });
     });
     autoUpdater.checkForUpdates();
