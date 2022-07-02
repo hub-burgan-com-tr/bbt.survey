@@ -116,7 +116,6 @@ let isAppQuitting = false;
 let afterRemoveOsName = '';
 let isEmojiClick = false;
 let isBeforeClickEmoji = false;
-let onUpdateAvailable = 'Yeni sürüm mevcut';
 
 const osName = os.userInfo().username;
 afterRemoveOsName = osName.slice(2);
@@ -174,12 +173,12 @@ export default class AppUpdater {
   }
 }
 
-// autoUpdater.checkForUpdatesAndNotify();
-// autoUpdater.downloadUpdate();
-// autoUpdater.on('update-downloaded', (info) => {
-//   autoUpdater.autoInstallOnAppQuit = true;
-//   autoUpdater.quitAndInstall();
-// });
+autoUpdater.checkForUpdatesAndNotify();
+autoUpdater.downloadUpdate();
+autoUpdater.on('update-downloaded', (info) => {
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.quitAndInstall();
+});
 
 // autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
 //   const dialogOpts = {
