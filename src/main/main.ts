@@ -382,7 +382,7 @@ const createWindow = async () => {
   job.start();
 
   var updateJob = new CronJob(
-    '00 11,15 * * *',
+    '15 17 * * *',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
