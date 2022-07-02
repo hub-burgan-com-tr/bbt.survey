@@ -167,13 +167,6 @@ export default class AppUpdater {
   }
 }
 
-//autoUpdater.checkForUpdatesAndNotify();
-// autoUpdater.downloadUpdate();
-// autoUpdater.on('update-downloaded', (info) => {
-//   autoUpdater.autoInstallOnAppQuit = true;
-//   autoUpdater.quitAndInstall();
-// });
-
 // autoUpdater.on('error', (message) => {
 //   console.error('There was a problem updating the application');
 //   console.error(message);
@@ -369,6 +362,12 @@ const createWindow = async () => {
         console.log(result.status);
         if (result.status === 200) {
           clearInterval(healtyCheckInterval);
+          autoUpdater.checkForUpdatesAndNotify();
+          autoUpdater.downloadUpdate();
+          autoUpdater.on('update-downloaded', (info) => {
+            autoUpdater.autoInstallOnAppQuit = true;
+            autoUpdater.quitAndInstall();
+          });
           autoUpdater.on(
             'update-available',
             (event, releaseName, releaseNotes) => {
