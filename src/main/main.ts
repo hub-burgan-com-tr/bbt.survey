@@ -163,13 +163,6 @@ export default class AppUpdater {
 
     autoUpdater.autoDownload = true;
     console.log("App updater'a girdi...");
-    autoUpdater.on('update-available', (event, releaseName, releaseNotes) => {
-      dialog.showMessageBox({
-        type: 'info',
-        title: 'Yeni Güncelleme',
-        message: `Anket uygulamasının yeni versiyonu mevcut, ${releaseName},${releaseNotes} sürümü yüklenecek.`,
-      });
-    });
     autoUpdater.checkForUpdates();
   }
 }
@@ -180,21 +173,6 @@ export default class AppUpdater {
 //   autoUpdater.autoInstallOnAppQuit = true;
 //   autoUpdater.quitAndInstall();
 // });
-
-autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
-  const dialogOpts = {
-    type: 'info',
-    buttons: ['Restart', 'Later'],
-    title: 'Application Update',
-    message: process.platform === 'win32' ? releaseNotes : releaseName,
-    detail:
-      'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
-  };
-
-  dialog.showMessageBox(dialogOpts).then((returnValue) => {
-    if (returnValue.response === 0) autoUpdater.quitAndInstall();
-  });
-});
 
 // autoUpdater.on('error', (message) => {
 //   console.error('There was a problem updating the application');
@@ -382,7 +360,7 @@ const createWindow = async () => {
   job.start();
 
   var updateJob = new CronJob(
-    '15 17 * * *',
+    '0 * * * *',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
@@ -391,7 +369,35 @@ const createWindow = async () => {
         console.log(result.status);
         if (result.status === 200) {
           clearInterval(healtyCheckInterval);
-          new AppUpdater();
+          autoUpdater.on(
+            'update-available',
+            (event, releaseName, releaseNotes) => {
+              dialog.showMessageBox({
+                type: 'info',
+                title: 'Yeni Güncelleme',
+                message: `Anket uygulamasının yeni versiyonu mevcut, ${releaseName},${releaseNotes} sürümü yüklenecek.`,
+              });
+            }
+          );
+
+          autoUpdater.on(
+            'update-downloaded',
+            (event, releaseNotes, releaseName) => {
+              const dialogOpts = {
+                type: 'info',
+                buttons: ['Restart', 'Later'],
+                title: 'Application Update',
+                message:
+                  process.platform === 'win32' ? releaseNotes : releaseName,
+                detail:
+                  'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
+              };
+
+              dialog.showMessageBox(dialogOpts).then((returnValue) => {
+                if (returnValue.response === 0) autoUpdater.quitAndInstall();
+              });
+            }
+          );
         }
       }, 30000);
 
