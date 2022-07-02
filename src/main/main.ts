@@ -162,17 +162,17 @@ export default class AppUpdater {
 
     autoUpdater.autoDownload = true;
     console.log("App updater'a girdi...");
-    autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.on('update-available', (releaseName) => {
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'Yeni Güncelleme',
+        message: `Yeni güncelleme mevcut, ${releaseName} sürümü yüklenecek.`,
+      });
+    });
+    autoUpdater.checkForUpdates();
   }
 }
 
-autoUpdater.on('update-available', (releaseName) => {
-  dialog.showMessageBox({
-    type: 'info',
-    title: 'Yeni Güncelleme',
-    message: `Yeni güncelleme mevcut, ${releaseName} sürümü yüklenecek.`,
-  });
-});
 //autoUpdater.checkForUpdatesAndNotify();
 // autoUpdater.downloadUpdate();
 // autoUpdater.on('update-downloaded', (info) => {
