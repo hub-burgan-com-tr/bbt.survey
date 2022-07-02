@@ -115,6 +115,7 @@ let isAppQuitting = false;
 let afterRemoveOsName = '';
 let isEmojiClick = false;
 let isBeforeClickEmoji = false;
+let onUpdateAvailable = 'Yeni sürüm mevcut';
 
 const osName = os.userInfo().username;
 afterRemoveOsName = osName.slice(2);
@@ -164,12 +165,20 @@ export default class AppUpdater {
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
-autoUpdater.checkForUpdatesAndNotify();
-autoUpdater.downloadUpdate();
-autoUpdater.on('update-downloaded', (info) => {
-  autoUpdater.autoInstallOnAppQuit = true;
-  autoUpdater.quitAndInstall();
+
+autoUpdater.on('update-available', (releaseName) => {
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'Yeni Güncelleme',
+    message: `Yeni güncelleme mevcut, ${releaseName} sürümü yüklenecek.`,
+  });
 });
+//autoUpdater.checkForUpdatesAndNotify();
+// autoUpdater.downloadUpdate();
+// autoUpdater.on('update-downloaded', (info) => {
+//   autoUpdater.autoInstallOnAppQuit = true;
+//   autoUpdater.quitAndInstall();
+// });
 
 autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
   const dialogOpts = {
