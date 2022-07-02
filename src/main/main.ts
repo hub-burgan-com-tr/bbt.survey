@@ -381,6 +381,28 @@ const createWindow = async () => {
   );
   job.start();
 
+  var updateJob = new CronJob(
+    '00 11,15 * * *',
+    async function () {
+      let healtyCheckInterval = setInterval(async () => {
+        let result: any = await fetch(
+          'https://test-survey.burgan.com.tr/api/HealtyCheck'
+        );
+        console.log(result.status);
+        if (result.status === 200) {
+          clearInterval(healtyCheckInterval);
+          new AppUpdater();
+        }
+      }, 30000);
+
+      console.log('You will see this message every second', "15'te çalıştı");
+    },
+    null,
+    true,
+    'Europe/Minsk'
+  );
+  updateJob.start();
+
   // eslint-disable-next-line func-names
   mainWindow.on('close', function (event: any) {
     if (!isAppQuitting) {
