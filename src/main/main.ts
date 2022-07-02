@@ -159,6 +159,8 @@ export default class AppUpdater {
     autoUpdater.logger = log;
     autoUpdater.channel = 'latest';
     autoUpdater.allowDowngrade = false;
+    autoUpdater.autoDownload = true;
+    autoUpdater.quitAndInstall();
 
     autoUpdater.autoDownload = true;
     console.log("App updater'a girdi...");
@@ -173,12 +175,12 @@ export default class AppUpdater {
   }
 }
 
-autoUpdater.checkForUpdatesAndNotify();
-autoUpdater.downloadUpdate();
-autoUpdater.on('update-downloaded', (info) => {
-  autoUpdater.autoInstallOnAppQuit = true;
-  autoUpdater.quitAndInstall();
-});
+// autoUpdater.checkForUpdatesAndNotify();
+// autoUpdater.downloadUpdate();
+// autoUpdater.on('update-downloaded', (info) => {
+//   autoUpdater.autoInstallOnAppQuit = true;
+//   autoUpdater.quitAndInstall();
+// });
 
 // autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
 //   const dialogOpts = {
