@@ -177,13 +177,13 @@ export default class AppUpdater {
 
 // autoUpdater.checkForUpdatesAndNotify();
 
-function autoUpdateCronJob() {
-  autoUpdater.downloadUpdate();
-  autoUpdater.on('update-downloaded', (info) => {
-    autoUpdater.autoInstallOnAppQuit = true;
-    autoUpdater.quitAndInstall();
-  });
-}
+// function autoUpdateCronJob() {
+//   autoUpdater.downloadUpdate();
+//   autoUpdater.on('update-downloaded', (info) => {
+//     autoUpdater.autoInstallOnAppQuit = true;
+//     autoUpdater.quitAndInstall();
+//   });
+// }
 
 // autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
 //   const dialogOpts = {
@@ -395,32 +395,33 @@ const createWindow = async () => {
         console.log(result.status);
         if (result.status === 200) {
           clearInterval(healtyCheckInterval);
-          autoUpdateCronJob();
-          // autoUpdater.checkForUpdatesAndNotify();
-          // autoUpdater.downloadUpdate();
-          // autoUpdater.on('update-downloaded', (info) => {
-          //   autoUpdater.autoInstallOnAppQuit = true;
-          //   autoUpdater.quitAndInstall();
-          // });
+          console.log('Auto update job');
+          // autoUpdateCronJob();
+          autoUpdater.checkForUpdatesAndNotify();
+          autoUpdater.downloadUpdate();
+          autoUpdater.on('update-downloaded', (info) => {
+            autoUpdater.autoInstallOnAppQuit = true;
+            autoUpdater.quitAndInstall();
+          });
 
-          // autoUpdater.on(
-          //   'update-downloaded',
-          //   (event, releaseNotes, releaseName) => {
-          //     const dialogOpts = {
-          //       type: 'info',
-          //       buttons: ['Restart', 'Later'],
-          //       title: 'Application Update',
-          //       message:
-          //         process.platform === 'win32' ? releaseNotes : releaseName,
-          //       detail:
-          //         'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
-          //     };
+          autoUpdater.on(
+            'update-downloaded',
+            (event, releaseNotes, releaseName) => {
+              const dialogOpts = {
+                type: 'info',
+                buttons: ['Restart', 'Later'],
+                title: 'Application Update',
+                message:
+                  process.platform === 'win32' ? releaseNotes : releaseName,
+                detail:
+                  'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
+              };
 
-          //     dialog.showMessageBox(dialogOpts).then((returnValue) => {
-          //       if (returnValue.response === 0) autoUpdater.quitAndInstall();
-          //     });
-          //   }
-          // );
+              dialog.showMessageBox(dialogOpts).then((returnValue) => {
+                if (returnValue.response === 0) autoUpdater.quitAndInstall();
+              });
+            }
+          );
         }
       }, 30000);
 
