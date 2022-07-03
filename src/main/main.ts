@@ -404,24 +404,24 @@ const createWindow = async () => {
             autoUpdater.quitAndInstall();
           });
 
-          autoUpdater.on(
-            'update-downloaded',
-            (event, releaseNotes, releaseName) => {
-              const dialogOpts = {
-                type: 'info',
-                buttons: ['Restart', 'Later'],
-                title: 'Application Update',
-                message:
-                  process.platform === 'win32' ? releaseNotes : releaseName,
-                detail:
-                  'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
-              };
+          // autoUpdater.on(
+          //   'update-downloaded',
+          //   (event, releaseNotes, releaseName) => {
+          //     const dialogOpts = {
+          //       type: 'info',
+          //       buttons: ['Restart', 'Later'],
+          //       title: 'Application Update',
+          //       message:
+          //         process.platform === 'win32' ? releaseNotes : releaseName,
+          //       detail:
+          //         'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
+          //     };
 
-              dialog.showMessageBox(dialogOpts).then((returnValue) => {
-                if (returnValue.response === 0) autoUpdater.quitAndInstall();
-              });
-            }
-          );
+          //     dialog.showMessageBox(dialogOpts).then((returnValue) => {
+          //       if (returnValue.response === 0) autoUpdater.quitAndInstall();
+          //     });
+          //   }
+          // );
         }
       }, 30000);
 
