@@ -176,11 +176,11 @@ export default class AppUpdater {
 }
 
 // autoUpdater.checkForUpdatesAndNotify();
-// autoUpdater.downloadUpdate();
-// autoUpdater.on('update-downloaded', (info) => {
-//   autoUpdater.autoInstallOnAppQuit = true;
-//   autoUpdater.quitAndInstall();
-// });
+autoUpdater.downloadUpdate();
+autoUpdater.on('update-downloaded', (info) => {
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.quitAndInstall();
+});
 
 // autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
 //   const dialogOpts = {
