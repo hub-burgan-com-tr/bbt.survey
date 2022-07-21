@@ -108,7 +108,7 @@ const Hello = () => {
           VoteLimit: 0,
         };
         console.log(resultUser, userInfo);
-        await delay(5000);
+        //await delay(5000);
         console.log('after delay');
         const result = await API.USERS_POSTINFO(userInfo);
         console.log('PostUserInfo fonksiyonu', result);
