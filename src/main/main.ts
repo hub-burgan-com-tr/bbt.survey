@@ -550,16 +550,16 @@ const createTray = () => {
     //Prod tray
     tray = new Tray('resources/assets/happy.ico');
     tray.setToolTip('Anket Uygulaması');
-    tray.on('click', () => {
-      mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
-    });
+    // tray.on('click', () => {
+    //   mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
+    // });
   } else {
     //developer Tray
     tray = new Tray('happyApp.ico');
     tray.setToolTip('Anket Uygulaması');
-    tray.on('click', () => {
-      mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
-    });
+    // tray.on('click', () => {
+    //   mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
+    // });
   }
 
   //tray.setImage('./resources/assets/happyApp.ico');
