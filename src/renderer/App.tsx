@@ -93,8 +93,6 @@ const Hello = () => {
   const [userIdFromData, setUserIdFromdata] = useState<any>();
 
   async function postUserInfo() {
-    console.log('before');
-
     try {
       let isUser = window.electron.store.get('osUser');
       if (!!isUser) {
@@ -108,6 +106,7 @@ const Hello = () => {
           VoteLimit: 0,
         };
         console.log(resultUser, userInfo);
+        console.log('before');
         //await delay(5000);
         console.log('after delay');
         const result = await API.USERS_POSTINFO(userInfo);
