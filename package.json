@@ -73,8 +73,10 @@
       ]
     },
     "win": {
+      "msi":true,
       "target": [
-        "nsis"
+        "nsis",
+        "msi"
       ],
       "icon": "assets/icons/happyApp.ico",
       "publish": [
