@@ -363,6 +363,17 @@ const createWindow = async () => {
   //   },
   // });
 
+  var closeAppJob = new CronJob(
+    '00 23 * * *',
+    function () {
+      mainWindow.hide();
+    },
+    null,
+    true,
+    'Europe/Minsk'
+  );
+  closeAppJob.start();
+
   var job = new CronJob(
     '00 11,15 * * *',
     async function () {
