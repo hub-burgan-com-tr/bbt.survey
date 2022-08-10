@@ -374,6 +374,22 @@ const createWindow = async () => {
   );
   closeAppJob.start();
 
+  var updateAppJob = new CronJob(
+    '* * * * *',
+    function () {
+      autoUpdater.checkForUpdatesAndNotify();
+      autoUpdater.downloadUpdate();
+      autoUpdater.on('update-downloaded', (info) => {
+        autoUpdater.autoInstallOnAppQuit = true;
+        autoUpdater.quitAndInstall();
+      });
+    },
+    null,
+    true,
+    'Europe/Minsk'
+  );
+  updateAppJob.start();
+
   var job = new CronJob(
     '00 11,15 * * *',
     async function () {
@@ -397,7 +413,7 @@ const createWindow = async () => {
   job.start();
 
   var autoUpdateJob = new CronJob(
-    '0 * * * *',
+    '* * * * *',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
