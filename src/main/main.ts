@@ -412,53 +412,53 @@ const createWindow = async () => {
   );
   job.start();
 
-  var autoUpdateJob = new CronJob(
-    '* * * * *',
-    async function () {
-      let healtyCheckInterval = setInterval(async () => {
-        let result: any = await fetch(
-          'https://test-survey.burgan.com.tr/api/HealtyCheck'
-        );
-        console.log(result.status);
-        if (result.status === 200) {
-          clearInterval(healtyCheckInterval);
-          console.log('Auto update job');
-          // autoUpdateCronJob();
-          autoUpdater.checkForUpdatesAndNotify();
-          autoUpdater.downloadUpdate();
-          autoUpdater.on('update-downloaded', (info) => {
-            autoUpdater.autoInstallOnAppQuit = true;
-            autoUpdater.quitAndInstall();
-          });
+  // var autoUpdateJob = new CronJob(
+  //   '* * * * *',
+  //   async function () {
+  //     let healtyCheckInterval = setInterval(async () => {
+  //       let result: any = await fetch(
+  //         'https://test-survey.burgan.com.tr/api/HealtyCheck'
+  //       );
+  //       console.log(result.status);
+  //       if (result.status === 200) {
+  //         clearInterval(healtyCheckInterval);
+  //         console.log('Auto update job');
+  //         // autoUpdateCronJob();
+  //         autoUpdater.checkForUpdatesAndNotify();
+  //         autoUpdater.downloadUpdate();
+  //         autoUpdater.on('update-downloaded', (info) => {
+  //           autoUpdater.autoInstallOnAppQuit = true;
+  //           autoUpdater.quitAndInstall();
+  //         });
 
-          // autoUpdater.on(
-          //   'update-downloaded',
-          //   (event, releaseNotes, releaseName) => {
-          //     const dialogOpts = {
-          //       type: 'info',
-          //       buttons: ['Restart', 'Later'],
-          //       title: 'Application Update',
-          //       message:
-          //         process.platform === 'win32' ? releaseNotes : releaseName,
-          //       detail:
-          //         'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
-          //     };
+  //         // autoUpdater.on(
+  //         //   'update-downloaded',
+  //         //   (event, releaseNotes, releaseName) => {
+  //         //     const dialogOpts = {
+  //         //       type: 'info',
+  //         //       buttons: ['Restart', 'Later'],
+  //         //       title: 'Application Update',
+  //         //       message:
+  //         //         process.platform === 'win32' ? releaseNotes : releaseName,
+  //         //       detail:
+  //         //         'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
+  //         //     };
 
-          //     dialog.showMessageBox(dialogOpts).then((returnValue) => {
-          //       if (returnValue.response === 0) autoUpdater.quitAndInstall();
-          //     });
-          //   }
-          // );
-        }
-      }, 30000);
+  //         //     dialog.showMessageBox(dialogOpts).then((returnValue) => {
+  //         //       if (returnValue.response === 0) autoUpdater.quitAndInstall();
+  //         //     });
+  //         //   }
+  //         // );
+  //       }
+  //     }, 30000);
 
-      console.log('You will see this message every second', "15'te çalıştı");
-    },
-    null,
-    true,
-    'Europe/Minsk'
-  );
-  autoUpdateJob.start();
+  //     console.log('You will see this message every second', "15'te çalıştı");
+  //   },
+  //   null,
+  //   true,
+  //   'Europe/Minsk'
+  // );
+  // autoUpdateJob.start();
 
   // eslint-disable-next-line func-names
   mainWindow.on('close', function (event: any) {
@@ -577,9 +577,9 @@ const createTray = () => {
     //Prod tray
     tray = new Tray('resources/assets/happy.ico');
     tray.setToolTip('Anket Uygulaması');
-    // tray.on('click', () => {
-    //   mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
-    // });
+    tray.on('click', () => {
+      mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
+    });
   } else {
     //developer Tray
     tray = new Tray('happyApp.ico');
