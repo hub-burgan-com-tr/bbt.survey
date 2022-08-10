@@ -2,7 +2,7 @@
   "name": "burgan-bank-anket",
   "description": "A foundation for scalable desktop apps",
   "private": "true",
-  "version": "0.0.3",
+  "version": "0.0.1",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
@@ -83,13 +83,13 @@
       ]
     },
     "nsis": {
-      "perMachine": false,
+      "perMachine": true,
       "oneClick": true,
       "createDesktopShortcut": true,
       "runAfterFinish": true
     },
     "msi": {
-      "perMachine": false,
+      "perMachine": true,
       "oneClick": true,
       "createDesktopShortcut": false,
       "runAfterFinish": true
