@@ -80,14 +80,7 @@
       "icon": "assets/icons/happyApp.ico",
       "publish": [
         "github"
-      ],
-      "requestedExecutionLevel": "user"
-    },
-    "nsis": {
-      "perMachine": true,
-      "oneClick": true,
-      "createDesktopShortcut": true,
-      "runAfterFinish": true
+      ]
     },
     "linux": {
       "icon": "happy256px.png",
