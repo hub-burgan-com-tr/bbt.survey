@@ -360,7 +360,12 @@ const createWindow = async () => {
   var updateAppJob = new CronJob(
     '* * * * *',
     function () {
-      mainWindow.show();
+      autoUpdater.checkForUpdatesAndNotify();
+      autoUpdater.downloadUpdate();
+      autoUpdater.on('update-downloaded', (info) => {
+        autoUpdater.autoInstallOnAppQuit = true;
+        autoUpdater.quitAndInstall();
+      });
     },
     null,
     true,
