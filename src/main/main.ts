@@ -289,18 +289,6 @@ const createWindow = async () => {
     }
   });
 
-  // function findOsUser() {
-  //   let interval = setInterval(() => {
-  //     console.log('osus222er:::::', afterRemoveOsName);
-
-  //     if (afterRemoveOsName) {
-  //       console.log('osuser:::::', afterRemoveOsName);
-  //       store.set('osUser', afterRemoveOsName);
-  //       clearInterval(interval);
-  //     }
-  //   }, 1000);
-  // }
-
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   // mainWindow.setOverlayIcon('./assets/icons/happyApp.ico', 'Anket Uygulaması');
   // mainWindow.setIcon('./assets/icons/happyApp.ico');
