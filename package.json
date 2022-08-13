@@ -81,7 +81,7 @@
       "publish": [
         "github"
       ],
-      "requestExecutionLevel": "user"
+      "requestedExecutionLevel": "user"
     },
     "nsis": {
       "perMachine": true,
