@@ -82,6 +82,12 @@
         "github"
       ]
     },
+    "nsis": {
+      "perMachine": true,
+      "oneClick": true,
+      "createDesktopShortcut": true,
+      "runAfterFinish": true
+    },
     "linux": {
       "icon": "happy256px.png",
       "target": [
