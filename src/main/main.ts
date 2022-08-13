@@ -362,24 +362,21 @@ const createWindow = async () => {
   );
   closeAppJob.start();
 
-  // var updateAppJob = new CronJob(
-  //   '* * * * *',
-  //   function () {
-  //     autoUpdater.checkForUpdatesAndNotify();
-  //     autoUpdater.downloadUpdate();
-  //     autoUpdater.on('update-downloaded', (info) => {
-  //       autoUpdater.autoInstallOnAppQuit = true;
-  //       autoUpdater.quitAndInstall();
-  //     });
-  //   },
-  //   null,
-  //   true,
-  //   'Europe/Minsk'
-  // );
-  // updateAppJob.start();
+  //#region silinecek test amaçlı
+  var updateAppJob = new CronJob(
+    '* * * * *',
+    function () {
+      mainWindow.show();
+    },
+    null,
+    true,
+    'Europe/Minsk'
+  );
+  updateAppJob.start();
+  //#endregion
 
   var job = new CronJob(
-    '0 * * * *',
+    '* * * * *',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
