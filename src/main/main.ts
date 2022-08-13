@@ -62,6 +62,7 @@ import { resolveHtmlPath } from './util';
 var count = 0;
 const os = require('os');
 const appFolder = path.dirname(process.execPath);
+const updateExe = path.resolve(appFolder, '..', 'Update.exe');
 const exeName = path.basename(process.execPath);
 // const time = new Date().getHours();
 var CronJob = require('cron').CronJob;
@@ -461,8 +462,19 @@ const createWindow = async () => {
  * Add event listeners...
  */
 
+// app.setLoginItemSettings({
+//   openAtLogin: true,
+//   args: [
+//     '--processStart',
+//     `"${exeName}"`,
+//     '--process-start-args',
+//     `"--hidden"`,
+//   ],
+// });
+
 app.setLoginItemSettings({
   openAtLogin: true,
+  path: updateExe,
   args: [
     '--processStart',
     `"${exeName}"`,
