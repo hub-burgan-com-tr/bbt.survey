@@ -186,25 +186,25 @@ export default class AppUpdater {
 //   });
 // }
 
-// autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
-//   const dialogOpts = {
-//     type: 'info',
-//     buttons: ['Restart', 'Later'],
-//     title: 'Application Update',
-//     message: process.platform === 'win32' ? releaseNotes : releaseName,
-//     detail:
-//       'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
-//   };
+autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+  const dialogOpts = {
+    type: 'info',
+    buttons: ['Restart', 'Later'],
+    title: 'Application Update',
+    message: process.platform === 'win32' ? releaseNotes : releaseName,
+    detail:
+      'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
+  };
 
-//   dialog.showMessageBox(dialogOpts).then((returnValue) => {
-//     if (returnValue.response === 0) autoUpdater.quitAndInstall();
-//   });
-// });
+  dialog.showMessageBox(dialogOpts).then((returnValue) => {
+    if (returnValue.response === 0) autoUpdater.quitAndInstall();
+  });
+});
 
-// autoUpdater.on('error', (message) => {
-//   console.error('There was a problem updating the application');
-//   console.error(message);
-// });
+autoUpdater.on('error', (message) => {
+  console.error('There was a problem updating the application');
+  console.error(message);
+});
 
 let mainWindow: any | null = null;
 
@@ -357,25 +357,25 @@ const createWindow = async () => {
   closeAppJob.start();
 
   //#region silinecek test amaçlı
-  var updateAppJob = new CronJob(
-    '* * * * *',
-    function () {
-      autoUpdater.checkForUpdatesAndNotify();
-      autoUpdater.downloadUpdate();
-      autoUpdater.on('update-downloaded', (info) => {
-        autoUpdater.autoInstallOnAppQuit = true;
-        autoUpdater.quitAndInstall();
-      });
-    },
-    null,
-    true,
-    'Europe/Minsk'
-  );
-  updateAppJob.start();
+  // var updateAppJob = new CronJob(
+  //   '* * * * *',
+  //   function () {
+  //     autoUpdater.checkForUpdatesAndNotify();
+  //     autoUpdater.downloadUpdate();
+  //     autoUpdater.on('update-downloaded', (info) => {
+  //       autoUpdater.autoInstallOnAppQuit = true;
+  //       autoUpdater.quitAndInstall();
+  //     });
+  //   },
+  //   null,
+  //   true,
+  //   'Europe/Minsk'
+  // );
+  // updateAppJob.start();
   //#endregion
 
   var job = new CronJob(
-    '* * * * *',
+    '0 11,15 * * 1,2,3,4,5',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
@@ -397,7 +397,7 @@ const createWindow = async () => {
   job.start();
 
   var autoUpdateJob = new CronJob(
-    '0 * * * *',
+    '0 */3 * * *',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
@@ -515,55 +515,7 @@ app.on('ready', () => {
 
   electron.powerMonitor.on('suspend', () => {
     console.log('The system is going to on suspend');
-
-    // var suspendInterval:any =setInterval(()=>{
-    //   let suspendDate=new Date().getHours();
-    //   console.log(suspendDate)
-    //   if(suspendDate>=15){
-    //     count=0;
-    //   }
-    // },600000)
-
-    // setTimeout(() => {
-    //   let suspendDate=new Date().getHours();
-    //   console.log(suspendDate)
-    //   if(suspendDate>=15){
-    //     count=0;
-    //   }
-    // });
   });
-
-  // var timeInterval: any = setInterval(() => {
-  //   let showDate = new Date().getHours();
-  //   console.log(
-  //     'saat',
-  //     showDate,
-  //     'show sayisi',
-  //     count,
-  //     'app path: ',
-  //     app.getAppPath(),
-  //     'appVersion : ',
-  //     app.getVersion(),
-  //     'store ondidChange : ',
-  //     store.get('count')
-  //   );
-
-  //   var showCounter = store.get('count');
-  //   console.log(
-  //     'showCounter degiskeni : ',
-  //     showCounter,
-  //     'count degisken : ',
-  //     count
-  //   );
-  //   if (showCounter === 1 && showDate > 11 && showDate < 14) {
-  //     mainWindow.show();
-  //   } else if (showCounter === 2 && showDate > 15 && showDate < 18) {
-  //     mainWindow.show();
-  //   } else if (showCounter === 3 || showDate > 18) {
-  //     count = 0;
-  //     store.set('count', count);
-  //   }
-  // }, 6000);
 });
 
 let tray;
@@ -572,9 +524,9 @@ const createTray = () => {
     //Prod tray
     tray = new Tray('resources/assets/happy.ico');
     tray.setToolTip('Anket Uygulaması');
-    tray.on('click', () => {
-      mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
-    });
+    // tray.on('click', () => {
+    //   mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
+    // });
   } else {
     //developer Tray
     tray = new Tray('happyApp.ico');
@@ -590,18 +542,8 @@ const createTray = () => {
 app
   .whenReady()
   .then(createWindow)
+  .then(() => {})
   .then(() => {
-    //startNotifyTimerAM();
-  })
-  .then(() => {
-    // const icon = nativeImage.createFromPath('happy.ico');
-    // tray = new Tray(icon);
-    // tray.setToolTip('Anket Uygulaması');
-    // tray.on('click', () => {
-    //   mainWindow?.isVisible() ? mainWindow.hide() : mainWindow.show();
-    // });
-    //initTray();
-    //traySystem();
     createTray();
   })
   .catch((error) => {
