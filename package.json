@@ -2,7 +2,7 @@
   "name": "burgan-bank-anket",
   "description": "A foundation for scalable desktop apps",
   "private": "true",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
@@ -37,7 +37,7 @@
     "appId": "org.erb.Personel Anket",
     "asar": false,
     "asarUnpack": "**\\*.{node,dll}",
-    "buildVersion": "0.0.1",
+    "buildVersion": "0.0.2",
     "files": [
       "dist",
       "node_modules",
