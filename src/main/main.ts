@@ -362,21 +362,21 @@ const createWindow = async () => {
   );
   closeAppJob.start();
 
-  var updateAppJob = new CronJob(
-    '* * * * *',
-    function () {
-      autoUpdater.checkForUpdatesAndNotify();
-      autoUpdater.downloadUpdate();
-      autoUpdater.on('update-downloaded', (info) => {
-        autoUpdater.autoInstallOnAppQuit = true;
-        autoUpdater.quitAndInstall();
-      });
-    },
-    null,
-    true,
-    'Europe/Minsk'
-  );
-  updateAppJob.start();
+  // var updateAppJob = new CronJob(
+  //   '* * * * *',
+  //   function () {
+  //     autoUpdater.checkForUpdatesAndNotify();
+  //     autoUpdater.downloadUpdate();
+  //     autoUpdater.on('update-downloaded', (info) => {
+  //       autoUpdater.autoInstallOnAppQuit = true;
+  //       autoUpdater.quitAndInstall();
+  //     });
+  //   },
+  //   null,
+  //   true,
+  //   'Europe/Minsk'
+  // );
+  // updateAppJob.start();
 
   var job = new CronJob(
     '0 11,15 * * 1,2,3,4,5',
@@ -401,7 +401,7 @@ const createWindow = async () => {
   job.start();
 
   var autoUpdateJob = new CronJob(
-    '0 * * * *',
+    '* * * * *',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
@@ -494,7 +494,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', () => {
-  autoUpdater.checkForUpdatesAndNotify();
+  //autoUpdater.checkForUpdatesAndNotify();
   app.hasSingleInstanceLock();
   //initTray();
 
