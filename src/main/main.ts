@@ -175,36 +175,6 @@ export default class AppUpdater {
   }
 }
 
-// autoUpdater.checkForUpdatesAndNotify();
-
-// function autoUpdateCronJob() {
-//   autoUpdater.downloadUpdate();
-//   autoUpdater.on('update-downloaded', (info) => {
-//     autoUpdater.autoInstallOnAppQuit = true;
-//     autoUpdater.quitAndInstall();
-//   });
-// }
-
-// autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
-//   const dialogOpts = {
-//     type: 'info',
-//     buttons: ['Restart', 'Later'],
-//     title: 'Application Update',
-//     message: process.platform === 'win32' ? releaseNotes : releaseName,
-//     detail:
-//       'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
-//   };
-
-//   dialog.showMessageBox(dialogOpts).then((returnValue) => {
-//     if (returnValue.response === 0) autoUpdater.quitAndInstall();
-//   });
-// });
-
-// autoUpdater.on('error', (message) => {
-//   console.error('There was a problem updating the application');
-//   console.error(message);
-// });
-
 let mainWindow: any | null = null;
 
 // ipcMain.on('ipc-example', async (event: any, arg: any) => {
@@ -355,22 +325,6 @@ const createWindow = async () => {
   );
   closeAppJob.start();
 
-  // var updateAppJob = new CronJob(
-  //   '* * * * *',
-  //   function () {
-  //     autoUpdater.checkForUpdatesAndNotify();
-  //     autoUpdater.downloadUpdate();
-  //     autoUpdater.on('update-downloaded', (info) => {
-  //       autoUpdater.autoInstallOnAppQuit = true;
-  //       autoUpdater.quitAndInstall();
-  //     });
-  //   },
-  //   null,
-  //   true,
-  //   'Europe/Minsk'
-  // );
-  // updateAppJob.start();
-
   var job = new CronJob(
     '0 11,15 * * 1,2,3,4,5',
     async function () {
@@ -394,7 +348,7 @@ const createWindow = async () => {
   job.start();
 
   var autoUpdateJob = new CronJob(
-    '*/3 * * * *',
+    '*/2 * * * *',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
@@ -406,32 +360,13 @@ const createWindow = async () => {
           console.log('Auto update job');
           // autoUpdateCronJob();
           autoUpdater.checkForUpdatesAndNotify();
-          await autoUpdater.downloadUpdate();
+          autoUpdater.downloadUpdate();
           autoUpdater.on('update-downloaded', (info) => {
-            // autoUpdater.autoInstallOnAppQuit = true;
+            autoUpdater.autoInstallOnAppQuit = true;
             autoUpdater.quitAndInstall();
           });
-
-          autoUpdater.on(
-            'update-downloaded',
-            (event, releaseNotes, releaseName) => {
-              const dialogOpts = {
-                type: 'info',
-                buttons: ['Restart', 'Later'],
-                title: 'Application Update',
-                message:
-                  process.platform === 'win32' ? releaseNotes : releaseName,
-                detail:
-                  'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
-              };
-
-              dialog.showMessageBox(dialogOpts).then((returnValue) => {
-                if (returnValue.response === 0) autoUpdater.quitAndInstall();
-              });
-            }
-          );
         }
-      }, 30000);
+      }, 3000);
 
       console.log('You will see this message every second', "15'te çalıştı");
     },
@@ -440,6 +375,21 @@ const createWindow = async () => {
     'Europe/Minsk'
   );
   autoUpdateJob.start();
+
+  // autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+  //   const dialogOpts = {
+  //     type: 'info',
+  //     buttons: ['Restart', 'Later'],
+  //     title: 'Application Update',
+  //     message: process.platform === 'win32' ? releaseNotes : releaseName,
+  //     detail:
+  //       'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
+  //   };
+
+  //   dialog.showMessageBox(dialogOpts).then((returnValue) => {
+  //     if (returnValue.response === 0) autoUpdater.quitAndInstall();
+  //   });
+  // });
 
   // eslint-disable-next-line func-names
   mainWindow.on('close', function (event: any) {
