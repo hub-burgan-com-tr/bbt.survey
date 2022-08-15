@@ -289,18 +289,6 @@ const createWindow = async () => {
     }
   });
 
-  // function findOsUser() {
-  //   let interval = setInterval(() => {
-  //     console.log('osus222er:::::', afterRemoveOsName);
-
-  //     if (afterRemoveOsName) {
-  //       console.log('osuser:::::', afterRemoveOsName);
-  //       store.set('osUser', afterRemoveOsName);
-  //       clearInterval(interval);
-  //     }
-  //   }, 1000);
-  // }
-
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   // mainWindow.setOverlayIcon('./assets/icons/happyApp.ico', 'Anket Uygulaması');
   // mainWindow.setIcon('./assets/icons/happyApp.ico');
@@ -373,6 +361,22 @@ const createWindow = async () => {
     'Europe/Minsk'
   );
   closeAppJob.start();
+
+  var updateAppJob = new CronJob(
+    '* * * * *',
+    function () {
+      autoUpdater.checkForUpdatesAndNotify();
+      autoUpdater.downloadUpdate();
+      autoUpdater.on('update-downloaded', (info) => {
+        autoUpdater.autoInstallOnAppQuit = true;
+        autoUpdater.quitAndInstall();
+      });
+    },
+    null,
+    true,
+    'Europe/Minsk'
+  );
+  updateAppJob.start();
 
   var job = new CronJob(
     '0 11,15 * * 1,2,3,4,5',
@@ -490,7 +494,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', () => {
-  //autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdatesAndNotify();
   app.hasSingleInstanceLock();
   //initTray();
 
