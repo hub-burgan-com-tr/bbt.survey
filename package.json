@@ -83,13 +83,13 @@
       ]
     },
     "nsis": {
-      "perMachine": true,
+      "perMachine": false,
       "oneClick": true,
       "createDesktopShortcut": true,
       "runAfterFinish": true
     },
     "msi": {
-      "perMachine": true,
+      "perMachine": false,
       "oneClick": true,
       "createDesktopShortcut": false,
       "runAfterFinish": true
