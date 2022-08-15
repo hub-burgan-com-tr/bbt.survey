@@ -1,11 +1,11 @@
 {
   "name": "burgan-bank-anket",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Burgan Bank Personel Memnuniyet Anketi",
   "main": "./dist/main/main.js",
   "author": {
     "name": "Mehmet Akbaba",
-    "email": "makbaba@burgan.com.tr",
+    "email": "makbaba2@burgan.com.tr",
     "url": "https://github.com/hub-burgan-com-tr/bbt.survey.ui"
   },
   "icon": "happyApp.ico",
