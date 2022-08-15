@@ -62,7 +62,6 @@ import { resolveHtmlPath } from './util';
 var count = 0;
 const os = require('os');
 const appFolder = path.dirname(process.execPath);
-const updateExe = path.resolve(appFolder, '..', 'Update.exe');
 const exeName = path.basename(process.execPath);
 // const time = new Date().getHours();
 var CronJob = require('cron').CronJob;
@@ -186,25 +185,25 @@ export default class AppUpdater {
 //   });
 // }
 
-autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
-  const dialogOpts = {
-    type: 'info',
-    buttons: ['Restart', 'Later'],
-    title: 'Application Update',
-    message: process.platform === 'win32' ? releaseNotes : releaseName,
-    detail:
-      'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
-  };
+// autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+//   const dialogOpts = {
+//     type: 'info',
+//     buttons: ['Restart', 'Later'],
+//     title: 'Application Update',
+//     message: process.platform === 'win32' ? releaseNotes : releaseName,
+//     detail:
+//       'Yeni versiyon indirildi. Uygulama yükleme için tekrar başlatılacak.',
+//   };
 
-  dialog.showMessageBox(dialogOpts).then((returnValue) => {
-    if (returnValue.response === 0) autoUpdater.quitAndInstall();
-  });
-});
+//   dialog.showMessageBox(dialogOpts).then((returnValue) => {
+//     if (returnValue.response === 0) autoUpdater.quitAndInstall();
+//   });
+// });
 
-autoUpdater.on('error', (message) => {
-  console.error('There was a problem updating the application');
-  console.error(message);
-});
+// autoUpdater.on('error', (message) => {
+//   console.error('There was a problem updating the application');
+//   console.error(message);
+// });
 
 let mainWindow: any | null = null;
 
@@ -290,6 +289,18 @@ const createWindow = async () => {
     }
   });
 
+  // function findOsUser() {
+  //   let interval = setInterval(() => {
+  //     console.log('osus222er:::::', afterRemoveOsName);
+
+  //     if (afterRemoveOsName) {
+  //       console.log('osuser:::::', afterRemoveOsName);
+  //       store.set('osUser', afterRemoveOsName);
+  //       clearInterval(interval);
+  //     }
+  //   }, 1000);
+  // }
+
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   // mainWindow.setOverlayIcon('./assets/icons/happyApp.ico', 'Anket Uygulaması');
   // mainWindow.setIcon('./assets/icons/happyApp.ico');
@@ -344,6 +355,13 @@ const createWindow = async () => {
   store.onDidChange('count', (newValue, oldValue) => {
     console.log('Did Change', newValue);
   });
+  // new Cron({
+  //   cronTime: '0 0 10,15 ? * MON,TUE,WED,THU,FRI *',
+  //   onTick: async function () {
+  //     mainWindow.show();
+  //     start: true;
+  //   },
+  // });
 
   var closeAppJob = new CronJob(
     '00 23 * * *',
@@ -356,26 +374,8 @@ const createWindow = async () => {
   );
   closeAppJob.start();
 
-  //#region silinecek test amaçlı
-  // var updateAppJob = new CronJob(
-  //   '* * * * *',
-  //   function () {
-  //     autoUpdater.checkForUpdatesAndNotify();
-  //     autoUpdater.downloadUpdate();
-  //     autoUpdater.on('update-downloaded', (info) => {
-  //       autoUpdater.autoInstallOnAppQuit = true;
-  //       autoUpdater.quitAndInstall();
-  //     });
-  //   },
-  //   null,
-  //   true,
-  //   'Europe/Minsk'
-  // );
-  // updateAppJob.start();
-  //#endregion
-
   var job = new CronJob(
-    '0 11,15 * * 1,2,3,4,5',
+    '00 11,15 * * *',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
@@ -397,7 +397,7 @@ const createWindow = async () => {
   job.start();
 
   var autoUpdateJob = new CronJob(
-    '0 */3 * * *',
+    '0 * * * *',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
@@ -467,19 +467,8 @@ const createWindow = async () => {
  * Add event listeners...
  */
 
-// app.setLoginItemSettings({
-//   openAtLogin: true,
-//   args: [
-//     '--processStart',
-//     `"${exeName}"`,
-//     '--process-start-args',
-//     `"--hidden"`,
-//   ],
-// });
-
 app.setLoginItemSettings({
   openAtLogin: true,
-  path: updateExe,
   args: [
     '--processStart',
     `"${exeName}"`,
@@ -501,7 +490,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', () => {
-  autoUpdater.checkForUpdatesAndNotify();
+  //autoUpdater.checkForUpdatesAndNotify();
   app.hasSingleInstanceLock();
   //initTray();
 
@@ -542,8 +531,18 @@ const createTray = () => {
 app
   .whenReady()
   .then(createWindow)
-  .then(() => {})
   .then(() => {
+    //startNotifyTimerAM();
+  })
+  .then(() => {
+    // const icon = nativeImage.createFromPath('happy.ico');
+    // tray = new Tray(icon);
+    // tray.setToolTip('Anket Uygulaması');
+    // tray.on('click', () => {
+    //   mainWindow?.isVisible() ? mainWindow.hide() : mainWindow.show();
+    // });
+    //initTray();
+    //traySystem();
     createTray();
   })
   .catch((error) => {
