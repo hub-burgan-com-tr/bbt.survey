@@ -501,7 +501,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', () => {
-  //autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdatesAndNotify();
   app.hasSingleInstanceLock();
   //initTray();
 
