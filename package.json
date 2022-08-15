@@ -88,6 +88,12 @@
       "createDesktopShortcut": true,
       "runAfterFinish": true
     },
+    "msi": {
+      "perMachine": true,
+      "oneClick": true,
+      "createDesktopShortcut": false,
+      "runAfterFinish": true
+    },
     "linux": {
       "icon": "happy256px.png",
       "target": [
