@@ -343,13 +343,6 @@ const createWindow = async () => {
   store.onDidChange('count', (newValue, oldValue) => {
     console.log('Did Change', newValue);
   });
-  // new Cron({
-  //   cronTime: '0 0 10,15 ? * MON,TUE,WED,THU,FRI *',
-  //   onTick: async function () {
-  //     mainWindow.show();
-  //     start: true;
-  //   },
-  // });
 
   var closeAppJob = new CronJob(
     '00 23 * * *',
