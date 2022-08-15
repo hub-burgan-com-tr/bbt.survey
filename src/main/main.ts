@@ -375,7 +375,7 @@ const createWindow = async () => {
   closeAppJob.start();
 
   var job = new CronJob(
-    '00 11,15 * * *',
+    '0 11,15 * * 1,2,3,4,5',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
@@ -513,9 +513,9 @@ const createTray = () => {
     //Prod tray
     tray = new Tray('resources/assets/happy.ico');
     tray.setToolTip('Anket Uygulaması');
-    // tray.on('click', () => {
-    //   mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
-    // });
+    tray.on('click', () => {
+      mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
+    });
   } else {
     //developer Tray
     tray = new Tray('happyApp.ico');
@@ -535,14 +535,6 @@ app
     //startNotifyTimerAM();
   })
   .then(() => {
-    // const icon = nativeImage.createFromPath('happy.ico');
-    // tray = new Tray(icon);
-    // tray.setToolTip('Anket Uygulaması');
-    // tray.on('click', () => {
-    //   mainWindow?.isVisible() ? mainWindow.hide() : mainWindow.show();
-    // });
-    //initTray();
-    //traySystem();
     createTray();
   })
   .catch((error) => {
