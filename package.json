@@ -76,7 +76,6 @@
         "nsis",
         "msi"
       ],
-      "isAdminRightsRequired": false,
       "icon": "assets/icons/happyApp.ico",
       "publish": [
         "github"
