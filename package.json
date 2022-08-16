@@ -2,7 +2,7 @@
   "name": "burgan-bank-anket",
   "description": "A foundation for scalable desktop apps",
   "private": "true",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
@@ -76,6 +76,7 @@
         "nsis",
         "msi"
       ],
+      "isAdminRightsRequired": false,
       "icon": "assets/icons/happyApp.ico",
       "publish": [
         "github"
@@ -84,15 +85,12 @@
     "nsis": {
       "guid": "c74b56b8-6430-41dc-938a-c647adca88d3",
       "oneClick": true,
-      "perMachine": true,
       "packElevateHelper": true,
       "deleteAppDataOnUninstall": true,
-      "allowElevation": true,
       "runAfterFinish": true
     },
     "msi": {
       "oneClick": true,
-      "perMachine": true,
       "runAfterFinish": true
     },
     "linux": {
