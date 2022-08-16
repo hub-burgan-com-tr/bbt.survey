@@ -89,8 +89,7 @@
     },
     "msi": {
       "oneClick": true,
-      "createDesktopShortcut": false,
-      "allowToChangeInstallationDirectory": true
+      "createDesktopShortcut": false
     },
     "linux": {
       "icon": "happy256px.png",
