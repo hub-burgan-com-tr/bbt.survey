@@ -85,13 +85,13 @@
     "nsis": {
       "guid": "c74b56b8-6430-41dc-938a-c647adca88d3",
       "oneClick": true,
-      "packElevateHelper": true,
-      "deleteAppDataOnUninstall": true,
-      "runAfterFinish": true
+      "runAfterFinish": true,
+      "allowToChangeInstallationDirectory": true
     },
     "msi": {
       "oneClick": true,
-      "runAfterFinish": true
+      "createDesktopShortcut": false,
+      "allowToChangeInstallationDirectory": true
     },
     "linux": {
       "icon": "happy256px.png",
