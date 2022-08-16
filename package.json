@@ -87,13 +87,13 @@
       "perMachine": true,
       "packElevateHelper": true,
       "deleteAppDataOnUninstall": true,
-      "allowElevation": true
+      "allowElevation": true,
+      "runAfterFinish": true
     },
     "msi": {
       "oneClick": true,
       "perMachine": true,
-      "allowElevation": true,
-      "packElevateHelper": true
+      "runAfterFinish": true
     },
     "linux": {
       "icon": "happy256px.png",
