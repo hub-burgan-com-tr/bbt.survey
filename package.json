@@ -83,9 +83,10 @@
     },
     "nsis": {
       "guid": "c74b56b8-6430-41dc-938a-c647adca88d3",
-      "oneClick": true,
+      "oneClick": false,
       "runAfterFinish": true,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true
     },
     "msi": {
       "oneClick": true,
