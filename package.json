@@ -76,7 +76,6 @@
         "nsis",
         "msi"
       ],
-      "requestedExecutionLevel": "requireAdministrator",
       "icon": "assets/icons/happyApp.ico",
       "publish": [
         "github"
@@ -85,11 +84,16 @@
     "nsis": {
       "guid": "c74b56b8-6430-41dc-938a-c647adca88d3",
       "oneClick": true,
-      "perMachine": true
+      "perMachine": true,
+      "packElevateHelper": true,
+      "deleteAppDataOnUninstall": true,
+      "allowElevation": true
     },
     "msi": {
       "oneClick": true,
-      "perMachine": true
+      "perMachine": true,
+      "allowElevation": true,
+      "packElevateHelper": true
     },
     "linux": {
       "icon": "happy256px.png",
