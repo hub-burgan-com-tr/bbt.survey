@@ -325,22 +325,6 @@ const createWindow = async () => {
   );
   closeAppJob.start();
 
-  var updateAppJob = new CronJob(
-    '*/2 * * * *',
-    function () {
-      autoUpdater.checkForUpdatesAndNotify();
-      autoUpdater.downloadUpdate();
-      autoUpdater.on('update-downloaded', (info) => {
-        autoUpdater.autoInstallOnAppQuit = true;
-        autoUpdater.quitAndInstall();
-      });
-    },
-    null,
-    true,
-    'Europe/Minsk'
-  );
-  updateAppJob.start();
-
   var job = new CronJob(
     '0 11,15 * * 1,2,3,4,5',
     async function () {
@@ -363,34 +347,36 @@ const createWindow = async () => {
   );
   job.start();
 
-  var autoUpdateJob = new CronJob(
-    '* * * * *',
-    async function () {
-      let healtyCheckInterval = setInterval(async () => {
-        let result: any = await fetch(
-          'https://test-survey.burgan.com.tr/api/HealtyCheck'
-        );
-        console.log(result.status);
-        if (result.status === 200) {
-          clearInterval(healtyCheckInterval);
-          console.log('Auto update job');
-          // autoUpdateCronJob();
-          autoUpdater.checkForUpdatesAndNotify();
-          autoUpdater.downloadUpdate();
-          autoUpdater.on('update-downloaded', (info) => {
-            autoUpdater.autoInstallOnAppQuit = true;
-            autoUpdater.quitAndInstall();
-          });
-        }
-      }, 3000);
+  //#region Saatte bir çalışacak şekilde düzenlenecek.
+  // var autoUpdateJob = new CronJob(
+  //   '* * * * *',
+  //   async function () {
+  //     let healtyCheckInterval = setInterval(async () => {
+  //       let result: any = await fetch(
+  //         'https://test-survey.burgan.com.tr/api/HealtyCheck'
+  //       );
+  //       console.log(result.status);
+  //       if (result.status === 200) {
+  //         clearInterval(healtyCheckInterval);
+  //         console.log('Auto update job');
+  //         // autoUpdateCronJob();
+  //         autoUpdater.checkForUpdatesAndNotify();
+  //         autoUpdater.downloadUpdate();
+  //         autoUpdater.on('update-downloaded', (info) => {
+  //           autoUpdater.autoInstallOnAppQuit = true;
+  //           autoUpdater.quitAndInstall();
+  //         });
+  //       }
+  //     }, 3000);
 
-      console.log('You will see this message every second', "15'te çalıştı");
-    },
-    null,
-    true,
-    'Europe/Minsk'
-  );
-  autoUpdateJob.start();
+  //     console.log('You will see this message every second', "15'te çalıştı");
+  //   },
+  //   null,
+  //   true,
+  //   'Europe/Minsk'
+  // );
+  // autoUpdateJob.start();
+  //#endregion
 
   // autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
   //   const dialogOpts = {
