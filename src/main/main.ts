@@ -150,30 +150,32 @@ function sendStatusToWindow(text: any) {
 //   }, 1000);
 // }
 
-export default class AppUpdater {
-  constructor() {
-    // const server = 'https://g...content-available-to-author-only...b.com/yarasaa/anket-app';
-    // const url = `${server}/releases/tag/${app.getVersion()}`;
-    log.transports.file.level = 'info';
-    // autoUpdater.setFeedURL(url);
-    autoUpdater.logger = log;
-    autoUpdater.channel = 'latest';
-    autoUpdater.allowDowngrade = false;
-    autoUpdater.autoDownload = true;
-    autoUpdater.quitAndInstall();
+// export default class AppUpdater {
+//   constructor() {
+//     // const server = 'https://g...content-available-to-author-only...b.com/yarasaa/anket-app';
+//     // const url = `${server}/releases/tag/${app.getVersion()}`;
+//     log.transports.file.level = 'info';
+//     // autoUpdater.setFeedURL(url);
+//     autoUpdater.logger = log;
+//     autoUpdater.channel = 'latest';
+//     autoUpdater.allowDowngrade = false;
+//     autoUpdater.autoDownload = true;
+//     autoUpdater.quitAndInstall();
 
-    autoUpdater.autoDownload = true;
-    console.log("App updater'a girdi...");
-    // autoUpdater.on('update-available', (event, releaseName, releaseNotes) => {
-    //   dialog.showMessageBox({
-    //     type: 'info',
-    //     title: 'Yeni Güncelleme',
-    //     message: `Yeni güncelleme mevcut, ${releaseName},${releaseName} sürümü yüklenecek.`,
-    //   });
-    // });
-    autoUpdater.checkForUpdates();
-  }
-}
+//     autoUpdater.autoDownload = true;
+//     console.log("App updater'a girdi...");
+//     // autoUpdater.on('update-available', (event, releaseName, releaseNotes) => {
+//     //   dialog.showMessageBox({
+//     //     type: 'info',
+//     //     title: 'Yeni Güncelleme',
+//     //     message: `Yeni güncelleme mevcut, ${releaseName},${releaseName} sürümü yüklenecek.`,
+//     //   });
+//     // });
+//     autoUpdater.checkForUpdates().catch((err) => {
+//       console.log('Auto updater Crash...', err);
+//     });
+//   }
+// }
 
 let mainWindow: any | null = null;
 
@@ -264,7 +266,9 @@ const createWindow = async () => {
   // mainWindow.setIcon('./assets/icons/happyApp.ico');
 
   mainWindow.once('ready-to-show', () => {
-    autoUpdater.checkForUpdatesAndNotify();
+    // autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+    //   console.log('Auto updater crash', err);
+    // });
   });
 
   mainWindow.on('ready-to-show', () => {
@@ -409,7 +413,7 @@ const createWindow = async () => {
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
-  new AppUpdater();
+  //new AppUpdater();
 };
 
 /**
