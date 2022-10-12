@@ -352,34 +352,34 @@ const createWindow = async () => {
   job.start();
 
   //#region Saatte bir çalışacak şekilde düzenlenecek.
-  // var autoUpdateJob = new CronJob(
-  //   '* * * * *',
-  //   async function () {
-  //     let healtyCheckInterval = setInterval(async () => {
-  //       let result: any = await fetch(
-  //         'https://test-survey.burgan.com.tr/api/HealtyCheck'
-  //       );
-  //       console.log(result.status);
-  //       if (result.status === 200) {
-  //         clearInterval(healtyCheckInterval);
-  //         console.log('Auto update job');
-  //         // autoUpdateCronJob();
-  //         autoUpdater.checkForUpdatesAndNotify();
-  //         autoUpdater.downloadUpdate();
-  //         autoUpdater.on('update-downloaded', (info) => {
-  //           autoUpdater.autoInstallOnAppQuit = true;
-  //           autoUpdater.quitAndInstall();
-  //         });
-  //       }
-  //     }, 3000);
+  var autoUpdateJob = new CronJob(
+    '* * * * *',
+    async function () {
+      let healtyCheckInterval = setInterval(async () => {
+        let result: any = await fetch(
+          'https://test-survey.burgan.com.tr/api/HealtyCheck'
+        );
+        console.log(result.status);
+        if (result.status === 200) {
+          clearInterval(healtyCheckInterval);
+          console.log('Auto update job');
+          // autoUpdateCronJob();
+          autoUpdater.checkForUpdatesAndNotify();
+          autoUpdater.downloadUpdate();
+          autoUpdater.on('update-downloaded', (info) => {
+            autoUpdater.autoInstallOnAppQuit = true;
+            autoUpdater.quitAndInstall();
+          });
+        }
+      }, 3000);
 
-  //     console.log('You will see this message every second', "15'te çalıştı");
-  //   },
-  //   null,
-  //   true,
-  //   'Europe/Minsk'
-  // );
-  // autoUpdateJob.start();
+      console.log('You will see this message every second', "15'te çalıştı");
+    },
+    null,
+    true,
+    'Europe/Minsk'
+  );
+  autoUpdateJob.start();
   //#endregion
 
   // autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
@@ -422,6 +422,7 @@ const createWindow = async () => {
 
 app.setLoginItemSettings({
   openAtLogin: true,
+
   args: [
     '--processStart',
     `"${exeName}"`,
@@ -466,16 +467,16 @@ const createTray = () => {
     //Prod tray
     tray = new Tray('resources/assets/happy.ico');
     tray.setToolTip('Anket Uygulaması');
-    // tray.on('click', () => {
-    //   mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
-    // });
+    tray.on('click', () => {
+      mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
+    });
   } else {
     //developer Tray
     tray = new Tray('happyApp.ico');
     tray.setToolTip('Anket Uygulaması');
-    // tray.on('click', () => {
-    //   mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
-    // });
+    tray.on('click', () => {
+      mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show();
+    });
   }
 
   //tray.setImage('./resources/assets/happyApp.ico');
