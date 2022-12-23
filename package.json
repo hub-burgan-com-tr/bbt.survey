@@ -2,7 +2,7 @@
   "name": "burgan-bank-anket",
   "description": "A foundation for scalable desktop apps",
   "private": "true",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
@@ -82,13 +82,13 @@
       ]
     },
     "nsis": {
+      "include": "./build/installer.nsh",
       "runAfterFinish": true,
-      "packElevateHelper": true,
-      "perMachine": true
+      "deleteAppDataOnUninstall": true,
+      "guid": "7bfdff62-e76c-44d7-af79-30df5d1fdb37",
+      "perMachine": "true"
     },
-    "msi": {
-      "runAfterFinish": true
-    },
+    "msi": {},
     "linux": {
       "icon": "happy256px.png",
       "target": [
@@ -186,6 +186,7 @@
     "electron-notarize": "^1.2.1",
     "electron-rebuild": "^3.2.7",
     "electron-store": "^8.0.1",
+    "electron-wix-msi": "^5.0.0",
     "electronmon": "^2.0.2",
     "eslint": "^8.12.0",
     "eslint-config-airbnb-base": "^15.0.0",

@@ -1,0 +1,674 @@
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" 
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <!-- http://wixtoolset.org/documentation/manual/v3/xsd/wix/product.html -->
+  <Product Id="257110A2-3EEC-4A5C-82EA-CAA810098004" 
+           UpgradeCode="378fc7eb-4f7c-4c4c-9a09-9583a29f3c8d"
+           Name = "Burgan Bank Anket (Machine - MSI)"
+           Version="0.0.4.0"
+           Manufacturer="Burgan Bank"
+           Language="1033">
+    <!-- Only run this installer on Windows 7 or up (or if it"s already installed, I guess) -->
+    <!-- <Condition Message="This application is only supported on Windows 7 or higher.">
+      <![CDATA[Installed OR (VersionNT >= 601)]]>
+    </Condition> -->
+    <!-- http://wixtoolset.org/documentation/manual/v3/xsd/wix/package.html -->
+    <Package InstallerVersion="405"
+             Compressed="yes"
+             Comments="Windows Installer Package"
+             Platform="x86"
+             InstallScope="perMachine"/>
+    <!-- Don't allow downgrades -->
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A later version of this product is already installed. Setup will now exit."/>
+    <!-- This will hide our Uninstall entry in Apps & Features. We doing this so
+    we can write our own which we can better control. -->
+    <Property Id="ARPSYSTEMCOMPONENT" Value="1" />
+    <!-- While the MSI package is hidden in Apps & Features, it can still be queried
+    via PowerShell and other means. To differentiate we give the public entry a slightly
+    different name to make admins life easier.  -->
+    <Property Id="VisibleProductName" Value="Burgan Bank Anket (Machine)" />
+    <!-- Tells the package to install perUser or perMachine. In case of perUser, all
+    files will be redirected to the user profile and all registry entries to HKCU. -->
+    <Property Id="MSIINSTALLPERUSER" Secure="yes" Value="0" />
+    <!-- Overides the default install mode. It solves a problem where
+    individual packaged files that have the same version as in previous
+    installed App version will be deleted if the files are in use during
+    this upgrade. Unfortunately this causes an ICE 40 warning during linking. -->
+    <Property Id="REINSTALLMODE" Value="emus" />
+    <!-- Overrides the default reboot behavior if files are in use during the upgrade.
+    By default, this will be set to "ReallySuppress" to make sure no unexpected reboot will happpen.-->
+    <Property Id="REBOOT" Value="ReallySuppress" />
+    <!-- Installlation level to use that determines which features are installed.
+    see guides/enduser.md to check which Install Level maps to which feature that will
+    correspondingly get installed.
+    If not set, this will default to "2" (Main Feature, Launch On Login) -->
+    <Property Id="INSTALLLEVEL" Value="2" />
+    <!-- Allows to customize the Windows user group that gets access rights on
+    the install folder in cas the auto-updater is installed. User that run the App
+    must be part of that user group to be able to auto-update. -->
+    <Property Id="UPDATERUSERGROUP" Value="Users" />
+    <!-- A property to define whether the auto-updater is enabled when the
+    feature gets installed. This way the update can be installed but also be disabled
+    by overwriting the default value.  -->
+    <Property Id="AUTOUPDATEENABLED" Value="1" />
+    <!-- Necessary registry search to find the install path which is used by the
+    PurgeOnUninstall action. Since this package can be installed perUser or perMachine,
+    we have to look in both places. First successful search wins. -->
+    <Property Id="INSTALLPATH">
+      <RegistrySearch Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{257110A2-3EEC-4A5C-82EA-CAA810098004}.msq"
+                      Root="HKCU" 
+                      Type="raw"
+                      Id="INSTALLPATH_REGSEARCH_HKCU"
+                      Name="InstallPath"
+                      Win64="no"/>
+      <RegistrySearch Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{257110A2-3EEC-4A5C-82EA-CAA810098004}.msq"
+                      Root="HKLM" 
+                      Type="raw"
+                      Id="INSTALLPATH_REGSEARCH_HKLM"
+                      Name="InstallPath"
+                      Win64="no"/>
+    </Property>
+    <!-- Lets change the product name depending on the perUser installMode. 
+    This way the user and admins can see in which scope the MSI was installed. -->
+    <SetProperty Action="SetVisibleProductName" Id="VisibleProductName" Sequence="both" Before="AppSearch"  Value="Burgan Bank Anket (User)">
+      <![CDATA[MSIINSTALLPERUSER = "1"]]>
+    </SetProperty>
+    <!-- Again we give thee MSI generaten entry a slightly different name to help 
+    differentiate between the public one and the invisible one. -->
+    <SetProperty Action="SetProductName" Id="ProductName" Sequence="both" Before="AppSearch"  Value="Burgan Bank Anket (User - MSI)">
+      <![CDATA[MSIINSTALLPERUSER = "1"]]>
+    </SetProperty>
+
+    <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
+
+    <UI Id="UserInterface">
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+      <Property Id="WixUI_Mode" Value="FeatureTree" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="UserExit" />
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="CustomizeDlg">NOT Installed</Publish>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
+      <Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="1">Installed</Publish>
+      <Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">NOT Installed</Publish>
+      <Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="CustomizeDlg" Order="1">NOT Installed OR WixUI_InstallMode = "Change"</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="3">Installed AND PATCH</Publish>
+      <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="ChangeButton" Event="NewDialog" Value="CustomizeDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+    </UI>
+    <UIRef Id="WixUI_Common" />
+
+
+    <!-- Step 2: Add files and directories -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+       <!-- Installation files to %PROGRAMFILES% -->
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="APPLICATIONROOTDIRECTORY" Name="Burgan Bank Anket">
+          <Directory Id="__75af337d_adee_458d_b4e0_70d840ccb740" Name="app-0.0.4">
+            <Directory Id="_locales_a96b6b17_8c1a_41d6_a2d5_8dfd00f3416f" Name="locales">
+              <Component Id="_locales_am.pak_d55cccab_8e76_4442_9337_2b6b0fc393a6" Guid="988fcbd0-2784-427c-8f44-e06e49734760" Win64="no">
+                <File Name="am.pak" Id="_locales_am.pak_d55cccab_8e76_4442_9337_2b6b0fc393a6" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\am.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_ar.pak_87e6879b_4f8f_4f84_96f0_fae5d9de63c3" Guid="58b4cc9c-6568-4185-b75e-314248afd6cd" Win64="no">
+                <File Name="ar.pak" Id="_locales_ar.pak_87e6879b_4f8f_4f84_96f0_fae5d9de63c3" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\ar.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_bg.pak_11162b3c_951c_4175_a279_16b41a45ffce" Guid="8f01dfdd-c47d-46db-99e8-bd451bfe116f" Win64="no">
+                <File Name="bg.pak" Id="_locales_bg.pak_11162b3c_951c_4175_a279_16b41a45ffce" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\bg.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_bn.pak_e0ca3bbe_b14a_446c_b924_12ca99575722" Guid="ae6f570c-f6f1-4238-8d80-04711e22713c" Win64="no">
+                <File Name="bn.pak" Id="_locales_bn.pak_e0ca3bbe_b14a_446c_b924_12ca99575722" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\bn.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_ca.pak_b4008350_6524_425d_aa37_2955caeb1728" Guid="f26ee6fc-edef-4543-8435-3bec13ebc704" Win64="no">
+                <File Name="ca.pak" Id="_locales_ca.pak_b4008350_6524_425d_aa37_2955caeb1728" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\ca.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_cs.pak_ad4b5991_b776_4521_b5a0_1979de8daf92" Guid="4b52da60-b7f9-44b0-9982-9bc58abc8057" Win64="no">
+                <File Name="cs.pak" Id="_locales_cs.pak_ad4b5991_b776_4521_b5a0_1979de8daf92" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\cs.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_da.pak_ac3a9313_02ed_4ace_99fd_fbcc61054d6d" Guid="a223e5b4-ea83-4e32-8521-3bde0bfd923e" Win64="no">
+                <File Name="da.pak" Id="_locales_da.pak_ac3a9313_02ed_4ace_99fd_fbcc61054d6d" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\da.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_de.pak_1111e89c_090f_444c_9dfa_ac4e63e211dc" Guid="bf8f439a-8891-4d04-92f5-9a72a26733b6" Win64="no">
+                <File Name="de.pak" Id="_locales_de.pak_1111e89c_090f_444c_9dfa_ac4e63e211dc" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\de.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_el.pak_00a52d58_9476_4238_9654_4fd4915b3432" Guid="8131a203-6127-4c1b-b6d6-dc5d5bc79bd2" Win64="no">
+                <File Name="el.pak" Id="_locales_el.pak_00a52d58_9476_4238_9654_4fd4915b3432" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\el.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_en_GB.pak_0d1bd76a_1a58_42e3_b277_272197c909ef" Guid="e983b825-cf85-431f-a643-1ad8b5afe08d" Win64="no">
+                <File Name="en-GB.pak" Id="_locales_en_GB.pak_0d1bd76a_1a58_42e3_b277_272197c909ef" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\en-GB.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_en_US.pak_5cd26a3a_35df_482a_9f76_87e232b892c0" Guid="76e0d6fe-d897-4ac9-9b2a-ba4a2ef10d89" Win64="no">
+                <File Name="en-US.pak" Id="_locales_en_US.pak_5cd26a3a_35df_482a_9f76_87e232b892c0" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\en-US.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_es_419.pak_41482ebb_c1ce_4eb4_9f97_ece0e9d17ae1" Guid="03adbdee-5431-4d95-9f62-cd91f98bccb1" Win64="no">
+                <File Name="es-419.pak" Id="_locales_es_419.pak_41482ebb_c1ce_4eb4_9f97_ece0e9d17ae1" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\es-419.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_es.pak_8238687f_80eb_4123_a9ee_2451673e603d" Guid="7c92218e-26fc-4848-b59f-4783d1ca5eda" Win64="no">
+                <File Name="es.pak" Id="_locales_es.pak_8238687f_80eb_4123_a9ee_2451673e603d" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\es.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_et.pak_8d5913ff_1333_45a3_9240_8335730aee4b" Guid="20911865-b760-4ba7-aeb6-ecb22b91f8f6" Win64="no">
+                <File Name="et.pak" Id="_locales_et.pak_8d5913ff_1333_45a3_9240_8335730aee4b" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\et.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_fa.pak_fa6951b2_c905_4db0_9e29_e25ee9e0e072" Guid="2232b7dc-e9c0-4cce-b9d2-b2b9973b0af6" Win64="no">
+                <File Name="fa.pak" Id="_locales_fa.pak_fa6951b2_c905_4db0_9e29_e25ee9e0e072" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\fa.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_fi.pak_01434be3_31ee_4275_9480_4108835fd831" Guid="73a0a419-a37f-4229-a061-fe67f4d7265e" Win64="no">
+                <File Name="fi.pak" Id="_locales_fi.pak_01434be3_31ee_4275_9480_4108835fd831" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\fi.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_fil.pak_4f96dfc5_66e8_48be_9285_52f5a78e3d01" Guid="e271570b-b22b-4da5-9edb-ee33fb20186d" Win64="no">
+                <File Name="fil.pak" Id="_locales_fil.pak_4f96dfc5_66e8_48be_9285_52f5a78e3d01" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\fil.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_fr.pak_f6e81352_ef0f_43d0_b57f_2a1c5bd94023" Guid="95df5c7e-3699-4731-a84e-675b31236313" Win64="no">
+                <File Name="fr.pak" Id="_locales_fr.pak_f6e81352_ef0f_43d0_b57f_2a1c5bd94023" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\fr.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_gu.pak_b67a1689_bb35_47ec_96b7_439a73d9dc0b" Guid="e0a6a890-d296-41c7-b775-f458e9fa8284" Win64="no">
+                <File Name="gu.pak" Id="_locales_gu.pak_b67a1689_bb35_47ec_96b7_439a73d9dc0b" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\gu.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_he.pak_ad860d28_be0c_4709_b67f_315e654e2b20" Guid="1ffcc9f5-f756-46f7-9e39-c3522dd06452" Win64="no">
+                <File Name="he.pak" Id="_locales_he.pak_ad860d28_be0c_4709_b67f_315e654e2b20" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\he.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_hi.pak_7b368739_ae33_4187_b74f_56fd44fe980a" Guid="9ee5eb43-a7d2-4715-90ba-c1669cc1b37b" Win64="no">
+                <File Name="hi.pak" Id="_locales_hi.pak_7b368739_ae33_4187_b74f_56fd44fe980a" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\hi.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_hr.pak_5a8be04b_e14e_4860_a07e_a1fa3382acee" Guid="4c2776e6-17a3-423a-81ab-98668d7c1847" Win64="no">
+                <File Name="hr.pak" Id="_locales_hr.pak_5a8be04b_e14e_4860_a07e_a1fa3382acee" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\hr.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_hu.pak_437a88ab_95ce_400a_b2e4_ea9f58bafb22" Guid="58ada12e-94a9-4379-95aa-27ff1f26ab06" Win64="no">
+                <File Name="hu.pak" Id="_locales_hu.pak_437a88ab_95ce_400a_b2e4_ea9f58bafb22" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\hu.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_id.pak_15a28af7_1917_4a92_aa38_6948bc63423e" Guid="fa53bdab-7a97-4007-8fe1-3c5897349968" Win64="no">
+                <File Name="id.pak" Id="_locales_id.pak_15a28af7_1917_4a92_aa38_6948bc63423e" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\id.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_it.pak_65c4a6b9_fba8_4932_b8b0_8488f522fbca" Guid="caf512f8-3e62-4718-9a16-13c54e35587f" Win64="no">
+                <File Name="it.pak" Id="_locales_it.pak_65c4a6b9_fba8_4932_b8b0_8488f522fbca" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\it.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_ja.pak_57da97d9_499c_4a46_a51b_ab5e340bf664" Guid="e87ddc02-3c66-4b1d-b3c4-de43ac37176a" Win64="no">
+                <File Name="ja.pak" Id="_locales_ja.pak_57da97d9_499c_4a46_a51b_ab5e340bf664" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\ja.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_kn.pak_d2bcffd0_99cf_4c02_afc0_695f1b44498e" Guid="d2e93bde-696e-41b5-ae20-771763e178a9" Win64="no">
+                <File Name="kn.pak" Id="_locales_kn.pak_d2bcffd0_99cf_4c02_afc0_695f1b44498e" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\kn.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_ko.pak_411c6643_b754_4461_ac4a_69e240c4e484" Guid="32f4d6a0-050f-4671-a5eb-34ce34eb486d" Win64="no">
+                <File Name="ko.pak" Id="_locales_ko.pak_411c6643_b754_4461_ac4a_69e240c4e484" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\ko.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_lt.pak_f214db2d_2ce8_40f4_b89b_0c6c7e945e4f" Guid="af41c272-4131-4edc-9170-481123906d57" Win64="no">
+                <File Name="lt.pak" Id="_locales_lt.pak_f214db2d_2ce8_40f4_b89b_0c6c7e945e4f" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\lt.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_lv.pak_d5c18284_6745_452c_9375_603597a18843" Guid="d8f445f3-f602-4374-aae9-b96c1b1f8123" Win64="no">
+                <File Name="lv.pak" Id="_locales_lv.pak_d5c18284_6745_452c_9375_603597a18843" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\lv.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_ml.pak_74536585_0701_4a02_a55a_7a0baac1df24" Guid="e09e5c0d-19da-40e5-b69e-5186587ec1bd" Win64="no">
+                <File Name="ml.pak" Id="_locales_ml.pak_74536585_0701_4a02_a55a_7a0baac1df24" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\ml.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_mr.pak_6fd972b8_f36f_4fa4_92f6_fea830e2b2c0" Guid="e6a60a1b-b975-4959-85ce-ff0d04c048d8" Win64="no">
+                <File Name="mr.pak" Id="_locales_mr.pak_6fd972b8_f36f_4fa4_92f6_fea830e2b2c0" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\mr.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_ms.pak_dbe96472_1141_43cc_9cdf_318397f954cf" Guid="c23dcc36-7539-4992-80d0-063d8e564713" Win64="no">
+                <File Name="ms.pak" Id="_locales_ms.pak_dbe96472_1141_43cc_9cdf_318397f954cf" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\ms.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_nb.pak_f375a4ea_5298_4e4d_b543_a31f4dc1cf44" Guid="ae831d1a-ce35-4cc7-ac90-5a43c0d0e03a" Win64="no">
+                <File Name="nb.pak" Id="_locales_nb.pak_f375a4ea_5298_4e4d_b543_a31f4dc1cf44" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\nb.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_nl.pak_4135d638_9aca_436e_a081_17fdf43db322" Guid="b27f7c18-1720-44b9-b439-80edc9cc8cb0" Win64="no">
+                <File Name="nl.pak" Id="_locales_nl.pak_4135d638_9aca_436e_a081_17fdf43db322" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\nl.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_pl.pak_43c89abb_0aaf_4a28_91de_99feaf3427af" Guid="69de0ae3-50f4-45b5-9996-1c2ea8202e8a" Win64="no">
+                <File Name="pl.pak" Id="_locales_pl.pak_43c89abb_0aaf_4a28_91de_99feaf3427af" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\pl.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_pt_BR.pak_70bf318e_2484_4413_a567_15b6b0fb3ac4" Guid="3f00cf22-e8ac-4f0a-b02c-bf0180441c34" Win64="no">
+                <File Name="pt-BR.pak" Id="_locales_pt_BR.pak_70bf318e_2484_4413_a567_15b6b0fb3ac4" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\pt-BR.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_pt_PT.pak_f0a52d14_2f48_4771_8347_1b542b721bb3" Guid="7231df4f-80a5-4a58-872d-9b1192df3f37" Win64="no">
+                <File Name="pt-PT.pak" Id="_locales_pt_PT.pak_f0a52d14_2f48_4771_8347_1b542b721bb3" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\pt-PT.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_ro.pak_935d0548_706a_465c_828f_4a2e7f2aa59f" Guid="f373e693-acd0-4f32-ade0-376d31223df8" Win64="no">
+                <File Name="ro.pak" Id="_locales_ro.pak_935d0548_706a_465c_828f_4a2e7f2aa59f" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\ro.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_ru.pak_c3c04723_b628_4b62_b52b_ba0f3bb0eb80" Guid="735caf83-3d93-4f83-8bff-43c4b280bf08" Win64="no">
+                <File Name="ru.pak" Id="_locales_ru.pak_c3c04723_b628_4b62_b52b_ba0f3bb0eb80" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\ru.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_sk.pak_0c9cb750_7b94_4b97_a19b_53f44bce3a9d" Guid="07605e30-dc62-407e-bd63-d728d28c38d3" Win64="no">
+                <File Name="sk.pak" Id="_locales_sk.pak_0c9cb750_7b94_4b97_a19b_53f44bce3a9d" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\sk.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_sl.pak_a54613b2_30da_4b26_b780_560763cb067f" Guid="35ccfa4a-1ffa-439e-86e7-8a676e43201e" Win64="no">
+                <File Name="sl.pak" Id="_locales_sl.pak_a54613b2_30da_4b26_b780_560763cb067f" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\sl.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_sr.pak_e9365983_3f10_4876_a70c_d1ca972837ce" Guid="253ff191-1eb8-44d0-8fde-977220b7bf64" Win64="no">
+                <File Name="sr.pak" Id="_locales_sr.pak_e9365983_3f10_4876_a70c_d1ca972837ce" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\sr.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_sv.pak_31a46c16_8550_47b5_89cd_73706da2975a" Guid="f5ac0062-c239-4688-a6b6-63b0d615bc7e" Win64="no">
+                <File Name="sv.pak" Id="_locales_sv.pak_31a46c16_8550_47b5_89cd_73706da2975a" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\sv.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_sw.pak_1feba45c_0806_4798_b040_076addfa6c7b" Guid="740f39d7-b364-4046-b179-f3036dff527a" Win64="no">
+                <File Name="sw.pak" Id="_locales_sw.pak_1feba45c_0806_4798_b040_076addfa6c7b" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\sw.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_ta.pak_3b524f31_ce2b_4fad_aa3f_387fe8035079" Guid="15dd69f1-84b3-4acd-b7c4-42d566d81cc2" Win64="no">
+                <File Name="ta.pak" Id="_locales_ta.pak_3b524f31_ce2b_4fad_aa3f_387fe8035079" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\ta.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_te.pak_1afae436_9857_4285_ab0a_e8ac14be1442" Guid="295f1156-3b7b-4ab0-97ce-a65d316fc0a0" Win64="no">
+                <File Name="te.pak" Id="_locales_te.pak_1afae436_9857_4285_ab0a_e8ac14be1442" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\te.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_th.pak_1b2f4d36_64a4_4b86_b979_20e8c88135f7" Guid="b50c6f6a-e382-4fe0-b22b-4b5d70d30cd0" Win64="no">
+                <File Name="th.pak" Id="_locales_th.pak_1b2f4d36_64a4_4b86_b979_20e8c88135f7" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\th.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_tr.pak_219de97a_d179_44af_b572_22d257365d4e" Guid="fcb6e957-6e6d-4c3e-9f79-8ff50b4a4dd0" Win64="no">
+                <File Name="tr.pak" Id="_locales_tr.pak_219de97a_d179_44af_b572_22d257365d4e" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\tr.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_uk.pak_ffd405f4_b1e4_4708_bd26_8096362411c3" Guid="01b179c0-f954-4f34-8ba0-ff9bcaa8b6e0" Win64="no">
+                <File Name="uk.pak" Id="_locales_uk.pak_ffd405f4_b1e4_4708_bd26_8096362411c3" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\uk.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_vi.pak_8afb0270_a69d_4c1d_be2f_dcbe7809e84c" Guid="4addfeae-fc02-4230-9c2c-5a1f31fde101" Win64="no">
+                <File Name="vi.pak" Id="_locales_vi.pak_8afb0270_a69d_4c1d_be2f_dcbe7809e84c" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\vi.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_zh_CN.pak_d6af4231_b9d9_43e4_a8b2_3d8829e5c197" Guid="85c401fc-590f-4959-8cee-66c2f2b81b04" Win64="no">
+                <File Name="zh-CN.pak" Id="_locales_zh_CN.pak_d6af4231_b9d9_43e4_a8b2_3d8829e5c197" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\zh-CN.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_locales_zh_TW.pak_56aadea2_caa6_4f76_a87a_848c48a292cd" Guid="a5056b8f-1dcc-4b08-9fec-acba14763af1" Win64="no">
+                <File Name="zh-TW.pak" Id="_locales_zh_TW.pak_56aadea2_caa6_4f76_a87a_848c48a292cd" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\locales\zh-TW.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+            </Directory>
+            <Directory Id="_resources_be4eba2d_0a22_4107_9ca8_49516ecfe0c2" Name="resources">
+              <Directory Id="_resources_app_231a5ed4_468e_419e_93aa_2acb51f85f94" Name="app">
+                <Directory Id="_resources_app_dist_be6244bc_228b_41bd_824a_a3e26b615b88" Name="dist">
+                  <Directory Id="_resources_app_dist_main_d321d5d3_1c11_406c_b7ba_fb9bddbde76b" Name="main">
+                    <Component Id="_resources_app_dist_main_main.js_b21baef5_b428_485c_89d7_c7f2822989b3" Guid="41f30f5a-fd3f-4f6d-91d7-d1da3b778e8b" Win64="no">
+                      <File Name="main.js" Id="_resources_app_dist_main_main.js_b21baef5_b428_485c_89d7_c7f2822989b3" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\app\dist\main\main.js" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                    </Component>
+                    <Component Id="_main.js.LICENSE.txt_8a070ef3_dc99_41fd_a458_80d205371333" Guid="2bbc4e8c-e9dd-4b03-a420-455cc62c80bf" Win64="no">
+                      <File Name="main.js.LICENSE.txt" Id="_main.js.LICENSE.txt_8a070ef3_dc99_41fd_a458_80d205371333" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\app\dist\main\main.js.LICENSE.txt" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                    </Component>
+                    <Component Id="_resources_app_dist_main_preload.js_78ecdf66_c83d_4a16_8dcd_50ac9ca7d96d" Guid="844a9941-8709-4691-b33f-1bab9e5db399" Win64="no">
+                      <File Name="preload.js" Id="_resources_app_dist_main_preload.js_78ecdf66_c83d_4a16_8dcd_50ac9ca7d96d" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\app\dist\main\preload.js" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                    </Component>
+                  </Directory>
+                  <Directory Id="_resources_app_dist_renderer_b383f980_15b8_44a5_9ab8_15ccf893f9d9" Name="renderer">
+                    <Component Id="_index.html_32701856_ed59_4da2_b35e_e793a207b23b" Guid="08e488a0-bb8b-4381-b2c9-83da3f4e26e0" Win64="no">
+                      <File Name="index.html" Id="_index.html_32701856_ed59_4da2_b35e_e793a207b23b" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\app\dist\renderer\index.html" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                    </Component>
+                    <Component Id="_renderer.js_4a285caf_3201_4955_9e42_a0e5bdb7becb" Guid="b30f30fd-4eeb-4dda-9843-b61977b0146e" Win64="no">
+                      <File Name="renderer.js" Id="_renderer.js_4a285caf_3201_4955_9e42_a0e5bdb7becb" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\app\dist\renderer\renderer.js" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                    </Component>
+                    <Component Id="_renderer.js.LICENSE.txt_f9f34d0c_3bc3_4204_91e1_5868fc0bb9b8" Guid="1cfd3bcd-b2fd-4d55-9028-0328c1131003" Win64="no">
+                      <File Name="renderer.js.LICENSE.txt" Id="_renderer.js.LICENSE.txt_f9f34d0c_3bc3_4204_91e1_5868fc0bb9b8" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\app\dist\renderer\renderer.js.LICENSE.txt" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                    </Component>
+                    <Component Id="_style.css_74e4edf9_6d4c_42b8_b4d6_a9c97e8e3cd1" Guid="09cae4b1-acf2-4df2-8644-409a89d25e44" Win64="no">
+                      <File Name="style.css" Id="_style.css_74e4edf9_6d4c_42b8_b4d6_a9c97e8e3cd1" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\app\dist\renderer\style.css" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                    </Component>
+                  </Directory>
+                </Directory>
+                <Component Id="_resources_app_package.json_7781fbc6_edc0_47e0_b0a1_34c62e35d93f" Guid="f2fa5af4-1a76-461d-9249-12b39f580822" Win64="no">
+                  <File Name="package.json" Id="_resources_app_package.json_7781fbc6_edc0_47e0_b0a1_34c62e35d93f" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\app\package.json" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                </Component>
+              </Directory>
+
+              <Directory Id="_resources_assets_22c1ac36_06ac_4b0c_b1d1_23ef3ceb7964" Name="assets">
+                <Directory Id="_resources_assets_icons_7e3b4669_09d7_4ed4_9cdf_c1534c87ba47" Name="icons">
+                  <Component Id="_1024x1024.png_104e4d7b_8424_470e_b5b6_08ccc42497e4" Guid="9a27f491-66c6-4ba4-96ea-3f6a84b87415" Win64="no">
+                    <File Name="1024x1024.png" Id="_1024x1024.png_104e4d7b_8424_470e_b5b6_08ccc42497e4" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\1024x1024.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                  <Component Id="_resources_assets_icons_128x128.png_3e61bcd2_41b3_417a_846a_8ea13c07b3c2" Guid="182b8314-654c-4727-8ddc-be683a8e1cbb" Win64="no">
+                    <File Name="128x128.png" Id="_resources_assets_icons_128x128.png_3e61bcd2_41b3_417a_846a_8ea13c07b3c2" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\128x128.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                  <Component Id="_resources_assets_icons_16x16.png_73280728_7b5b_4869_8f8b_040d20c642e9" Guid="4dffbdf0-b715-468a-8012-e444625f72d7" Win64="no">
+                    <File Name="16x16.png" Id="_resources_assets_icons_16x16.png_73280728_7b5b_4869_8f8b_040d20c642e9" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\16x16.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                  <Component Id="_resources_assets_icons_24x24.png_2a0d38cb_483f_4171_ad84_69cef021706d" Guid="b77f6fc5-f104-4a12-acaf-6716210b6055" Win64="no">
+                    <File Name="24x24.png" Id="_resources_assets_icons_24x24.png_2a0d38cb_483f_4171_ad84_69cef021706d" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\24x24.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                  <Component Id="_resources_assets_icons_256x256.png_efa39e80_48a8_4dcc_91eb_2122bcf9885a" Guid="969a7843-5ac1-4f2f-888c-dcd23b2efc83" Win64="no">
+                    <File Name="256x256.png" Id="_resources_assets_icons_256x256.png_efa39e80_48a8_4dcc_91eb_2122bcf9885a" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\256x256.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                  <Component Id="_resources_assets_icons_32x32.png_0f585d48_b2ec_430c_9d25_a6ce3548536b" Guid="576a922e-898f-4747-999f-a5c08148fd32" Win64="no">
+                    <File Name="32x32.png" Id="_resources_assets_icons_32x32.png_0f585d48_b2ec_430c_9d25_a6ce3548536b" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\32x32.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                  <Component Id="_resources_assets_icons_48x48.png_70aafd20_2452_4a71_a84a_fa3536d2bd3e" Guid="256dabf8-b971-41d9-abe6-473bdb26981a" Win64="no">
+                    <File Name="48x48.png" Id="_resources_assets_icons_48x48.png_70aafd20_2452_4a71_a84a_fa3536d2bd3e" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\48x48.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                  <Component Id="_resources_assets_icons_512x512.png_d4f8da1f_deda_4cd0_950f_dad6b496cd84" Guid="ff84f244-29f2-49dc-92c7-be91f5575183" Win64="no">
+                    <File Name="512x512.png" Id="_resources_assets_icons_512x512.png_d4f8da1f_deda_4cd0_950f_dad6b496cd84" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\512x512.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                  <Component Id="_resources_assets_icons_64x64.png_1ab863f5_ef7d_4a40_964e_edd901774fd7" Guid="8495a9db-0d01-4791-ba77-80409ce73981" Win64="no">
+                    <File Name="64x64.png" Id="_resources_assets_icons_64x64.png_1ab863f5_ef7d_4a40_964e_edd901774fd7" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\64x64.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                  <Component Id="_resources_assets_icons_96x96.png_ba89e1d2_b3f8_42fe_a898_0bf369db3839" Guid="45404871-5392-47ff-8090-72bcd0e3ad36" Win64="no">
+                    <File Name="96x96.png" Id="_resources_assets_icons_96x96.png_ba89e1d2_b3f8_42fe_a898_0bf369db3839" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\96x96.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                  <Component Id="_resources_assets_icons_happy.ico_c9c6927d_5f13_4f4a_9e29_cf4bcec8dfc6" Guid="01c8068e-537c-448c-ac52-1d56dd5b8bc7" Win64="no">
+                    <File Name="happy.ico" Id="_resources_assets_icons_happy.ico_c9c6927d_5f13_4f4a_9e29_cf4bcec8dfc6" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\happy.ico" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                  <Component Id="_happyApp.ico_7cbda119_e28f_4263_8c05_38e130a0fbe4" Guid="05391009-f196-496a-91a9-8fb584847385" Win64="no">
+                    <File Name="happyApp.ico" Id="_happyApp.ico_7cbda119_e28f_4263_8c05_38e130a0fbe4" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icons\happyApp.ico" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                  </Component>
+                </Directory>                <Component Id="_resources_assets_assets.d.ts_f23a0fe1_6521_4bb6_b03a_b1702bb2e376" Guid="9cfb0160-4abc-4859-855e-6a9a263f4889" Win64="no">
+                  <File Name="assets.d.ts" Id="_resources_assets_assets.d.ts_f23a0fe1_6521_4bb6_b03a_b1702bb2e376" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\assets.d.ts" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                </Component>
+                <Component Id="_entitlements.mac.plist_b0e9c539_647a_49ce_bd39_599488bcd0b2" Guid="df992b22-9cd9-484c-a9b4-ba8f4726b4c6" Win64="no">
+                  <File Name="entitlements.mac.plist" Id="_entitlements.mac.plist_b0e9c539_647a_49ce_bd39_599488bcd0b2" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\entitlements.mac.plist" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                </Component>
+                <Component Id="_resources_assets_happy.ico_0e31ce36_bb77_47d1_81bf_8583ef42318e" Guid="c5473402-a86a-4214-a4a5-3e4772392276" Win64="no">
+                  <File Name="happy.ico" Id="_resources_assets_happy.ico_0e31ce36_bb77_47d1_81bf_8583ef42318e" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\happy.ico" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                </Component>
+                <Component Id="_resources_assets_happy256px.png_9efb5fae_a50f_4553_b6f2_453403736675" Guid="0304aae3-9fb5-421b-b2ae-9b4212ba7027" Win64="no">
+                  <File Name="happy256px.png" Id="_resources_assets_happy256px.png_9efb5fae_a50f_4553_b6f2_453403736675" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\happy256px.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                </Component>
+                <Component Id="_resources_assets_happyApp.ico_fedf3eee_82f9_4e4f_a0f2_a0a26c0f510a" Guid="b55eeb6b-5914-410f-a5b4-d3c8e11226d9" Win64="no">
+                  <File Name="happyApp.ico" Id="_resources_assets_happyApp.ico_fedf3eee_82f9_4e4f_a0f2_a0a26c0f510a" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\happyApp.ico" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                </Component>
+                <Component Id="_resources_assets_icon.icns_d7f2d5b3_8402_4133_8665_b41bb531a423" Guid="de2a8126-4471-4456-bd8e-b86e5cbc2829" Win64="no">
+                  <File Name="icon.icns" Id="_resources_assets_icon.icns_d7f2d5b3_8402_4133_8665_b41bb531a423" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icon.icns" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                </Component>
+                <Component Id="_resources_assets_icon.ico_2d6b35cc_95ca_49ea_bd55_4a3f55c6e38a" Guid="754818cc-896d-4527-af26-51fe5663fae9" Win64="no">
+                  <File Name="icon.ico" Id="_resources_assets_icon.ico_2d6b35cc_95ca_49ea_bd55_4a3f55c6e38a" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icon.ico" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                </Component>
+                <Component Id="_resources_assets_icon.png_9860f678_ccaa_4e4e_b67b_ce82a790459c" Guid="3ab415ab-3b60-4e1e-9639-a0e34494170b" Win64="no">
+                  <File Name="icon.png" Id="_resources_assets_icon.png_9860f678_ccaa_4e4e_b67b_ce82a790459c" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icon.png" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                </Component>
+                <Component Id="_resources_assets_icon.svg_0fffbe11_bcb0_440d_8352_6e4a0f0abd75" Guid="99264f11-4146-40f4-98cf-329d3e0d4cac" Win64="no">
+                  <File Name="icon.svg" Id="_resources_assets_icon.svg_0fffbe11_bcb0_440d_8352_6e4a0f0abd75" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\assets\icon.svg" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+                </Component>
+              </Directory>
+              <Component Id="_resources_app_update.yml_06cf3d93_3cff_4536_8b76_6eeb29fffeab" Guid="cdb20aa5-92cb-464c-90d8-afcd6452f9e8" Win64="no">
+                <File Name="app-update.yml" Id="_resources_app_update.yml_06cf3d93_3cff_4536_8b76_6eeb29fffeab" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\app-update.yml" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_resources_elevate.exe_0c4a078d_9982_44a3_8016_863ff1be78a3" Guid="26c90c63-7f30-49ca-aba0-bce5fee83f9d" Win64="no">
+                <File Name="elevate.exe" Id="_resources_elevate.exe_0c4a078d_9982_44a3_8016_863ff1be78a3" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources\elevate.exe" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+            </Directory>
+
+            <Directory Id="_swiftshader_ea1fe07f_d72b_4cef_b20c_d212f5ff1d1f" Name="swiftshader">
+              <Component Id="_swiftshader_libEGL.dll_5fc9e544_61e8_4ea0_955e_cd9464c07dfc" Guid="7c28f114-00ad-4052-937f-8668dac842f2" Win64="no">
+                <File Name="libEGL.dll" Id="_swiftshader_libEGL.dll_5fc9e544_61e8_4ea0_955e_cd9464c07dfc" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\swiftshader\libEGL.dll" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+              <Component Id="_swiftshader_libGLESv2.dll_ef67c4ab_07ca_48f4_b5aa_d1ef6b969279" Guid="83e9dba0-2e0e-477b-b463-d8fb09f91149" Win64="no">
+                <File Name="libGLESv2.dll" Id="_swiftshader_libGLESv2.dll_ef67c4ab_07ca_48f4_b5aa_d1ef6b969279" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\swiftshader\libGLESv2.dll" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+              </Component>
+            </Directory>            <Component Id="_Burgan_Bank_Anket.exe_a23b3416_705c_446a_9abb_967b53b992e7" Guid="74c51c6c-f427-495c-97eb-2955d54003b0" Win64="no">
+              <File Name="Burgan Bank Anket.exe" Id="_Burgan_Bank_Anket.exe_a23b3416_705c_446a_9abb_967b53b992e7" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\Burgan Bank Anket.exe" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_LICENSE.electron.txt_6e7d9564_abaf_48a6_8ffc_a3a99e27ffdb" Guid="abf5629f-9aa1-4737-aa7e-4800c8b45a60" Win64="no">
+              <File Name="LICENSE.electron.txt" Id="_LICENSE.electron.txt_6e7d9564_abaf_48a6_8ffc_a3a99e27ffdb" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\LICENSE.electron.txt" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_LICENSES.chromium.html_96e69e1b_0590_4544_89f3_aa7af86ca48d" Guid="de88ccf1-9582-43a5-b420-b7e5c0e6c50a" Win64="no">
+              <File Name="LICENSES.chromium.html" Id="_LICENSES.chromium.html_96e69e1b_0590_4544_89f3_aa7af86ca48d" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\LICENSES.chromium.html" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_chrome_100_percent.pak_c6b51f46_cecc_4a9e_8532_d050cbe369c2" Guid="df09cf26-5b9d-4e24-b71d-5aaa38e52c71" Win64="no">
+              <File Name="chrome_100_percent.pak" Id="_chrome_100_percent.pak_c6b51f46_cecc_4a9e_8532_d050cbe369c2" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\chrome_100_percent.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_chrome_200_percent.pak_40536e21_ea61_4693_9099_c8a722eb99ce" Guid="f6eb6372-0e3b-459e-a82d-f432f2a06bee" Win64="no">
+              <File Name="chrome_200_percent.pak" Id="_chrome_200_percent.pak_40536e21_ea61_4693_9099_c8a722eb99ce" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\chrome_200_percent.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_d3dcompiler_47.dll_af817b4c_69ba_4c90_828c_108c5394939a" Guid="634e2d7d-8e20-447d-aed7-89e908a2506e" Win64="no">
+              <File Name="d3dcompiler_47.dll" Id="_d3dcompiler_47.dll_af817b4c_69ba_4c90_828c_108c5394939a" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\d3dcompiler_47.dll" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_ffmpeg.dll_e844950e_06b3_4c99_a3e1_d0062b7335d2" Guid="56fb2d50-2a98-4d9a-ae5e-919173d87e1f" Win64="no">
+              <File Name="ffmpeg.dll" Id="_ffmpeg.dll_e844950e_06b3_4c99_a3e1_d0062b7335d2" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\ffmpeg.dll" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_icudtl.dat_bca912b2_4b4d_4562_9e6b_87b80af2e8f7" Guid="c955505e-42e4-43b5-aae4-5200b62e29d0" Win64="no">
+              <File Name="icudtl.dat" Id="_icudtl.dat_bca912b2_4b4d_4562_9e6b_87b80af2e8f7" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\icudtl.dat" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_libEGL.dll_4da88ed7_7b5e_4cdf_b66f_25070b9bf809" Guid="1cc06e5b-3289-4c11-90f4-528a658462b3" Win64="no">
+              <File Name="libEGL.dll" Id="_libEGL.dll_4da88ed7_7b5e_4cdf_b66f_25070b9bf809" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\libEGL.dll" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_libGLESv2.dll_006463b2_085d_420b_a81f_b826dcd476d9" Guid="08c0b3d6-3ff2-46b1-a392-f30670e25e74" Win64="no">
+              <File Name="libGLESv2.dll" Id="_libGLESv2.dll_006463b2_085d_420b_a81f_b826dcd476d9" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\libGLESv2.dll" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_resources.pak_9aa7338c_f033_42e4_b486_fd46091e9d6e" Guid="6bd9837a-8c2c-4d13-975c-51d395b7a2ba" Win64="no">
+              <File Name="resources.pak" Id="_resources.pak_9aa7338c_f033_42e4_b486_fd46091e9d6e" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\resources.pak" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_snapshot_blob.bin_3fea4a04_0bc4_4428_bb2a_9e8c1381e56f" Guid="11447e15-e955-4fd9-8ecc-a5ca9ae77e9e" Win64="no">
+              <File Name="snapshot_blob.bin" Id="_snapshot_blob.bin_3fea4a04_0bc4_4428_bb2a_9e8c1381e56f" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\snapshot_blob.bin" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_v8_context_snapshot.bin_44a96c68_1086_4da0_b247_5404c759f347" Guid="d337d449-11a2-4bcc-8f5b-590ccd7a679b" Win64="no">
+              <File Name="v8_context_snapshot.bin" Id="_v8_context_snapshot.bin_44a96c68_1086_4da0_b247_5404c759f347" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\v8_context_snapshot.bin" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_vk_swiftshader.dll_f01f22f7_8c89_45ca_a5ca_99f709038596" Guid="0c43b394-7910-4255-9666-d99055f19ef7" Win64="no">
+              <File Name="vk_swiftshader.dll" Id="_vk_swiftshader.dll_f01f22f7_8c89_45ca_a5ca_99f709038596" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\vk_swiftshader.dll" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_vk_swiftshader_icd.json_0d2ad306_9460_492c_b869_fd6aee6bde1e" Guid="4512a50e-2700-4b25-abf5-445ed60747fd" Win64="no">
+              <File Name="vk_swiftshader_icd.json" Id="_vk_swiftshader_icd.json_0d2ad306_9460_492c_b869_fd6aee6bde1e" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\vk_swiftshader_icd.json" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+            <Component Id="_vulkan_1.dll_e2deb3f2_1341_4b4b_bc16_f4e4098fddee" Guid="a2424b9f-2fa6-454f-8b79-c93f981a40cd" Win64="no">
+              <File Name="vulkan-1.dll" Id="_vulkan_1.dll_e2deb3f2_1341_4b4b_bc16_f4e4098fddee" Source="C:\Users\HpElite\Desktop\SurveyUI\newUI\bbt.survey.ui\release\build\win-unpacked\vulkan-1.dll" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+            </Component>
+          </Directory>
+          <Component Id="_Burgan_Bank_Anket.exe_31a6b1aa_abc5_4570_a489_14b8d42af1b0" Guid="d1a9a08a-6552-4839-bf1c-bad8cab1564c" Win64="no">
+            <File Name="Burgan Bank Anket.exe" Id="_Burgan_Bank_Anket.exe_31a6b1aa_abc5_4570_a489_14b8d42af1b0" Source="C:\Users\HpElite\AppData\Local\Temp\Burgan Bank AnketRXfsbm\Burgan Bank Anket.exe" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+          </Component>
+          <Component Id="_.installInfo.json_319627a9_06c4_4af4_9d24_b74cc24452f0" Guid="b878a532-d03b-4c57-8124-82858664fd5e" Win64="no">
+            <File Name=".installInfo.json" Id="_.installInfo.json_319627a9_06c4_4af4_9d24_b74cc24452f0" Source="C:\Users\HpElite\AppData\Local\Temp\.installInfogQu9i9\.installInfo.json" KeyPath="yes" Checksum="yes" ProcessorArchitecture="x86"/>
+          </Component>
+          <Component Id="RegistryInstallPath" Guid="545c7081-539a-477b-a69c-de1e1e0063fb" Win64="no">
+            <RegistryKey Root="HKMU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{257110A2-3EEC-4A5C-82EA-CAA810098004}.msq" ForceCreateOnInstall="no" ForceDeleteOnUninstall="yes">
+              <RegistryValue Name="InstallPath" Type="string" Value="[APPLICATIONROOTDIRECTORY]" KeyPath="yes"/>
+            </RegistryKey>
+          </Component>
+          <Component Id="UninstallDisplayName" Guid="39208d3f-9872-4ea8-b8e5-7a08f4e69f3a" Win64="no">
+            <RegistryKey Root="HKMU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{257110A2-3EEC-4A5C-82EA-CAA810098004}.msq" ForceCreateOnInstall="no" ForceDeleteOnUninstall="yes">
+              <RegistryValue Name="DisplayName" Type="string" Value="[VisibleProductName]" KeyPath="yes"/>
+            </RegistryKey>
+          </Component>
+          <Component Id="UninstallPublisher" Guid="ea822693-ead0-46f8-8260-084f92793e20" Win64="no">
+            <RegistryKey Root="HKMU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{257110A2-3EEC-4A5C-82EA-CAA810098004}.msq" ForceCreateOnInstall="no" ForceDeleteOnUninstall="yes">
+              <RegistryValue Name="Publisher" Type="string" Value="Burgan Bank" KeyPath="yes"/>
+            </RegistryKey>
+          </Component>
+          <Component Id="UninstallDisplayVersion" Guid="75556038-1552-4c11-8957-14dee24ea2bf" Win64="no">
+            <RegistryKey Root="HKMU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{257110A2-3EEC-4A5C-82EA-CAA810098004}.msq" ForceCreateOnInstall="no" ForceDeleteOnUninstall="yes">
+              <RegistryValue Name="DisplayVersion" Type="string" Value="0.0.4" KeyPath="yes"/>
+            </RegistryKey>
+          </Component>
+          <Component Id="UninstallModifyString" Guid="a3f33d32-e90a-48fe-8aea-e0c9bd8167c6" Win64="no">
+            <RegistryKey Root="HKMU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{257110A2-3EEC-4A5C-82EA-CAA810098004}.msq" ForceCreateOnInstall="no" ForceDeleteOnUninstall="yes">
+              <RegistryValue Name="ModifyPath" Type="expandable" Value="MsiExec.exe /I {257110A2-3EEC-4A5C-82EA-CAA810098004}" KeyPath="yes"/>
+            </RegistryKey>
+          </Component>
+          <Component Id="UninstallString" Guid="69d8b9a7-0a19-41cc-98e1-e47f7a57e2d3" Win64="no">
+            <RegistryKey Root="HKMU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{257110A2-3EEC-4A5C-82EA-CAA810098004}.msq" ForceCreateOnInstall="no" ForceDeleteOnUninstall="yes">
+              <RegistryValue Name="UninstallString" Type="expandable" Value="MsiExec.exe /X {257110A2-3EEC-4A5C-82EA-CAA810098004}" KeyPath="yes"/>
+            </RegistryKey>
+          </Component>
+          <Component Id="UninstallDisplayIcon" Guid="35224beb-a533-48bf-bca6-cb9530f9e246" Win64="no">
+            <RegistryKey Root="HKMU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{257110A2-3EEC-4A5C-82EA-CAA810098004}.msq" ForceCreateOnInstall="no" ForceDeleteOnUninstall="yes">
+              <RegistryValue Name="DisplayIcon" Type="expandable" Value="[SystemFolder]msiexec.exe" KeyPath="yes"/>
+            </RegistryKey>
+          </Component>
+          <Component Id="RegistryRunKey" Guid="da43070c-4baf-4fef-8d56-7d0d8f4466a6" Win64="no">
+            <RegistryKey Root="HKMU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run" ForceCreateOnInstall="no" ForceDeleteOnUninstall="no">
+              <RegistryValue Name="com.squirrel.burgan bank anket.burgan bank anket" Type="string" Value="&quot;[APPLICATIONROOTDIRECTORY]Burgan Bank Anket.exe&quot;" KeyPath="yes"/>
+            </RegistryKey>
+          </Component>
+        </Directory>
+      </Directory>
+
+      <!-- Desktop -->
+      <Directory Id="DesktopFolder" Name="Desktop" />
+
+      <!-- Start Menu -->
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Burgan Bank"/>
+      </Directory>
+    </Directory>
+
+    <!-- Step 3: Add app to Start Menu -->
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="7dae9266-c912-453a-87a0-c06050a57f2f" Win64="no">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="Burgan Bank Anket"
+                  Description="Burgan Bank Anket"
+                  Target="[APPLICATIONROOTDIRECTORY]Burgan Bank Anket.exe"
+                  WorkingDirectory="APPLICATIONROOTDIRECTORY">
+          <ShortcutProperty Key="System.AppUserModel.ID" Value="com.squirrel.burgan bank anket.burgan bank anket"/>
+        </Shortcut>
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU"
+                       Key="Software\Microsoft\Burgan Bank Anket"
+                       Name="installed"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+
+   <!-- Step 4: Add app desktop shortcut --> 
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="e181ebf8-6cae-43be-b9cf-698db1c61c3e" >
+          <Shortcut Id="MyDesktopShortcut"
+                    Name="Burgan Bank Anket"
+                    Description="Burgan Bank Anket"
+                    Target="[APPLICATIONROOTDIRECTORY]Burgan Bank Anket.exe"
+                    WorkingDirectory="APPLICATIONROOTDIRECTORY"/>
+          <RegistryValue Root="HKCU"
+                    Key="Software\Microsoft\Burgan Bank Anket"
+                    Name="installed"
+                    Type="integer"
+                    Value="1"
+                    KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+
+    <!-- Lets cleanup any files that are were not part of the initial install
+    via this MSI. Such as newer versions installed by the auto-updater. -->
+    <DirectoryRef Id="APPLICATIONROOTDIRECTORY">
+      <Component Id="PurgeOnUninstall" Guid="e3b97768-8fe8-49c5-be52-f6911a8fdcc3" Win64="no">
+        <CreateFolder/>
+        <util:RemoveFolderEx On="uninstall" Property="INSTALLPATH" />
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="Complete" Title="Burgan Bank Anket (0.0.4)" Description="The complete package." Display="expand" Level="1" >
+      <!-- Step 5: Tell WiX to install the files -->
+      <Feature Id="MainApplication" Title="Main Application" Level="1" Description="The main components to run the applications." >
+        <ComponentRef Id="_locales_am.pak_d55cccab_8e76_4442_9337_2b6b0fc393a6" />
+        <ComponentRef Id="_locales_ar.pak_87e6879b_4f8f_4f84_96f0_fae5d9de63c3" />
+        <ComponentRef Id="_locales_bg.pak_11162b3c_951c_4175_a279_16b41a45ffce" />
+        <ComponentRef Id="_locales_bn.pak_e0ca3bbe_b14a_446c_b924_12ca99575722" />
+        <ComponentRef Id="_locales_ca.pak_b4008350_6524_425d_aa37_2955caeb1728" />
+        <ComponentRef Id="_locales_cs.pak_ad4b5991_b776_4521_b5a0_1979de8daf92" />
+        <ComponentRef Id="_locales_da.pak_ac3a9313_02ed_4ace_99fd_fbcc61054d6d" />
+        <ComponentRef Id="_locales_de.pak_1111e89c_090f_444c_9dfa_ac4e63e211dc" />
+        <ComponentRef Id="_locales_el.pak_00a52d58_9476_4238_9654_4fd4915b3432" />
+        <ComponentRef Id="_locales_en_GB.pak_0d1bd76a_1a58_42e3_b277_272197c909ef" />
+        <ComponentRef Id="_locales_en_US.pak_5cd26a3a_35df_482a_9f76_87e232b892c0" />
+        <ComponentRef Id="_locales_es_419.pak_41482ebb_c1ce_4eb4_9f97_ece0e9d17ae1" />
+        <ComponentRef Id="_locales_es.pak_8238687f_80eb_4123_a9ee_2451673e603d" />
+        <ComponentRef Id="_locales_et.pak_8d5913ff_1333_45a3_9240_8335730aee4b" />
+        <ComponentRef Id="_locales_fa.pak_fa6951b2_c905_4db0_9e29_e25ee9e0e072" />
+        <ComponentRef Id="_locales_fi.pak_01434be3_31ee_4275_9480_4108835fd831" />
+        <ComponentRef Id="_locales_fil.pak_4f96dfc5_66e8_48be_9285_52f5a78e3d01" />
+        <ComponentRef Id="_locales_fr.pak_f6e81352_ef0f_43d0_b57f_2a1c5bd94023" />
+        <ComponentRef Id="_locales_gu.pak_b67a1689_bb35_47ec_96b7_439a73d9dc0b" />
+        <ComponentRef Id="_locales_he.pak_ad860d28_be0c_4709_b67f_315e654e2b20" />
+        <ComponentRef Id="_locales_hi.pak_7b368739_ae33_4187_b74f_56fd44fe980a" />
+        <ComponentRef Id="_locales_hr.pak_5a8be04b_e14e_4860_a07e_a1fa3382acee" />
+        <ComponentRef Id="_locales_hu.pak_437a88ab_95ce_400a_b2e4_ea9f58bafb22" />
+        <ComponentRef Id="_locales_id.pak_15a28af7_1917_4a92_aa38_6948bc63423e" />
+        <ComponentRef Id="_locales_it.pak_65c4a6b9_fba8_4932_b8b0_8488f522fbca" />
+        <ComponentRef Id="_locales_ja.pak_57da97d9_499c_4a46_a51b_ab5e340bf664" />
+        <ComponentRef Id="_locales_kn.pak_d2bcffd0_99cf_4c02_afc0_695f1b44498e" />
+        <ComponentRef Id="_locales_ko.pak_411c6643_b754_4461_ac4a_69e240c4e484" />
+        <ComponentRef Id="_locales_lt.pak_f214db2d_2ce8_40f4_b89b_0c6c7e945e4f" />
+        <ComponentRef Id="_locales_lv.pak_d5c18284_6745_452c_9375_603597a18843" />
+        <ComponentRef Id="_locales_ml.pak_74536585_0701_4a02_a55a_7a0baac1df24" />
+        <ComponentRef Id="_locales_mr.pak_6fd972b8_f36f_4fa4_92f6_fea830e2b2c0" />
+        <ComponentRef Id="_locales_ms.pak_dbe96472_1141_43cc_9cdf_318397f954cf" />
+        <ComponentRef Id="_locales_nb.pak_f375a4ea_5298_4e4d_b543_a31f4dc1cf44" />
+        <ComponentRef Id="_locales_nl.pak_4135d638_9aca_436e_a081_17fdf43db322" />
+        <ComponentRef Id="_locales_pl.pak_43c89abb_0aaf_4a28_91de_99feaf3427af" />
+        <ComponentRef Id="_locales_pt_BR.pak_70bf318e_2484_4413_a567_15b6b0fb3ac4" />
+        <ComponentRef Id="_locales_pt_PT.pak_f0a52d14_2f48_4771_8347_1b542b721bb3" />
+        <ComponentRef Id="_locales_ro.pak_935d0548_706a_465c_828f_4a2e7f2aa59f" />
+        <ComponentRef Id="_locales_ru.pak_c3c04723_b628_4b62_b52b_ba0f3bb0eb80" />
+        <ComponentRef Id="_locales_sk.pak_0c9cb750_7b94_4b97_a19b_53f44bce3a9d" />
+        <ComponentRef Id="_locales_sl.pak_a54613b2_30da_4b26_b780_560763cb067f" />
+        <ComponentRef Id="_locales_sr.pak_e9365983_3f10_4876_a70c_d1ca972837ce" />
+        <ComponentRef Id="_locales_sv.pak_31a46c16_8550_47b5_89cd_73706da2975a" />
+        <ComponentRef Id="_locales_sw.pak_1feba45c_0806_4798_b040_076addfa6c7b" />
+        <ComponentRef Id="_locales_ta.pak_3b524f31_ce2b_4fad_aa3f_387fe8035079" />
+        <ComponentRef Id="_locales_te.pak_1afae436_9857_4285_ab0a_e8ac14be1442" />
+        <ComponentRef Id="_locales_th.pak_1b2f4d36_64a4_4b86_b979_20e8c88135f7" />
+        <ComponentRef Id="_locales_tr.pak_219de97a_d179_44af_b572_22d257365d4e" />
+        <ComponentRef Id="_locales_uk.pak_ffd405f4_b1e4_4708_bd26_8096362411c3" />
+        <ComponentRef Id="_locales_vi.pak_8afb0270_a69d_4c1d_be2f_dcbe7809e84c" />
+        <ComponentRef Id="_locales_zh_CN.pak_d6af4231_b9d9_43e4_a8b2_3d8829e5c197" />
+        <ComponentRef Id="_locales_zh_TW.pak_56aadea2_caa6_4f76_a87a_848c48a292cd" />
+        <ComponentRef Id="_resources_app_dist_main_main.js_b21baef5_b428_485c_89d7_c7f2822989b3" />
+        <ComponentRef Id="_main.js.LICENSE.txt_8a070ef3_dc99_41fd_a458_80d205371333" />
+        <ComponentRef Id="_resources_app_dist_main_preload.js_78ecdf66_c83d_4a16_8dcd_50ac9ca7d96d" />
+        <ComponentRef Id="_index.html_32701856_ed59_4da2_b35e_e793a207b23b" />
+        <ComponentRef Id="_renderer.js_4a285caf_3201_4955_9e42_a0e5bdb7becb" />
+        <ComponentRef Id="_renderer.js.LICENSE.txt_f9f34d0c_3bc3_4204_91e1_5868fc0bb9b8" />
+        <ComponentRef Id="_style.css_74e4edf9_6d4c_42b8_b4d6_a9c97e8e3cd1" />
+        <ComponentRef Id="_resources_app_package.json_7781fbc6_edc0_47e0_b0a1_34c62e35d93f" />
+        <ComponentRef Id="_1024x1024.png_104e4d7b_8424_470e_b5b6_08ccc42497e4" />
+        <ComponentRef Id="_resources_assets_icons_128x128.png_3e61bcd2_41b3_417a_846a_8ea13c07b3c2" />
+        <ComponentRef Id="_resources_assets_icons_16x16.png_73280728_7b5b_4869_8f8b_040d20c642e9" />
+        <ComponentRef Id="_resources_assets_icons_24x24.png_2a0d38cb_483f_4171_ad84_69cef021706d" />
+        <ComponentRef Id="_resources_assets_icons_256x256.png_efa39e80_48a8_4dcc_91eb_2122bcf9885a" />
+        <ComponentRef Id="_resources_assets_icons_32x32.png_0f585d48_b2ec_430c_9d25_a6ce3548536b" />
+        <ComponentRef Id="_resources_assets_icons_48x48.png_70aafd20_2452_4a71_a84a_fa3536d2bd3e" />
+        <ComponentRef Id="_resources_assets_icons_512x512.png_d4f8da1f_deda_4cd0_950f_dad6b496cd84" />
+        <ComponentRef Id="_resources_assets_icons_64x64.png_1ab863f5_ef7d_4a40_964e_edd901774fd7" />
+        <ComponentRef Id="_resources_assets_icons_96x96.png_ba89e1d2_b3f8_42fe_a898_0bf369db3839" />
+        <ComponentRef Id="_resources_assets_icons_happy.ico_c9c6927d_5f13_4f4a_9e29_cf4bcec8dfc6" />
+        <ComponentRef Id="_happyApp.ico_7cbda119_e28f_4263_8c05_38e130a0fbe4" />
+        <ComponentRef Id="_resources_assets_assets.d.ts_f23a0fe1_6521_4bb6_b03a_b1702bb2e376" />
+        <ComponentRef Id="_entitlements.mac.plist_b0e9c539_647a_49ce_bd39_599488bcd0b2" />
+        <ComponentRef Id="_resources_assets_happy.ico_0e31ce36_bb77_47d1_81bf_8583ef42318e" />
+        <ComponentRef Id="_resources_assets_happy256px.png_9efb5fae_a50f_4553_b6f2_453403736675" />
+        <ComponentRef Id="_resources_assets_happyApp.ico_fedf3eee_82f9_4e4f_a0f2_a0a26c0f510a" />
+        <ComponentRef Id="_resources_assets_icon.icns_d7f2d5b3_8402_4133_8665_b41bb531a423" />
+        <ComponentRef Id="_resources_assets_icon.ico_2d6b35cc_95ca_49ea_bd55_4a3f55c6e38a" />
+        <ComponentRef Id="_resources_assets_icon.png_9860f678_ccaa_4e4e_b67b_ce82a790459c" />
+        <ComponentRef Id="_resources_assets_icon.svg_0fffbe11_bcb0_440d_8352_6e4a0f0abd75" />
+        <ComponentRef Id="_resources_app_update.yml_06cf3d93_3cff_4536_8b76_6eeb29fffeab" />
+        <ComponentRef Id="_resources_elevate.exe_0c4a078d_9982_44a3_8016_863ff1be78a3" />
+        <ComponentRef Id="_swiftshader_libEGL.dll_5fc9e544_61e8_4ea0_955e_cd9464c07dfc" />
+        <ComponentRef Id="_swiftshader_libGLESv2.dll_ef67c4ab_07ca_48f4_b5aa_d1ef6b969279" />
+        <ComponentRef Id="_Burgan_Bank_Anket.exe_a23b3416_705c_446a_9abb_967b53b992e7" />
+        <ComponentRef Id="_LICENSE.electron.txt_6e7d9564_abaf_48a6_8ffc_a3a99e27ffdb" />
+        <ComponentRef Id="_LICENSES.chromium.html_96e69e1b_0590_4544_89f3_aa7af86ca48d" />
+        <ComponentRef Id="_chrome_100_percent.pak_c6b51f46_cecc_4a9e_8532_d050cbe369c2" />
+        <ComponentRef Id="_chrome_200_percent.pak_40536e21_ea61_4693_9099_c8a722eb99ce" />
+        <ComponentRef Id="_d3dcompiler_47.dll_af817b4c_69ba_4c90_828c_108c5394939a" />
+        <ComponentRef Id="_ffmpeg.dll_e844950e_06b3_4c99_a3e1_d0062b7335d2" />
+        <ComponentRef Id="_icudtl.dat_bca912b2_4b4d_4562_9e6b_87b80af2e8f7" />
+        <ComponentRef Id="_libEGL.dll_4da88ed7_7b5e_4cdf_b66f_25070b9bf809" />
+        <ComponentRef Id="_libGLESv2.dll_006463b2_085d_420b_a81f_b826dcd476d9" />
+        <ComponentRef Id="_resources.pak_9aa7338c_f033_42e4_b486_fd46091e9d6e" />
+        <ComponentRef Id="_snapshot_blob.bin_3fea4a04_0bc4_4428_bb2a_9e8c1381e56f" />
+        <ComponentRef Id="_v8_context_snapshot.bin_44a96c68_1086_4da0_b247_5404c759f347" />
+        <ComponentRef Id="_vk_swiftshader.dll_f01f22f7_8c89_45ca_a5ca_99f709038596" />
+        <ComponentRef Id="_vk_swiftshader_icd.json_0d2ad306_9460_492c_b869_fd6aee6bde1e" />
+        <ComponentRef Id="_vulkan_1.dll_e2deb3f2_1341_4b4b_bc16_f4e4098fddee" />
+        <ComponentRef Id="_Burgan_Bank_Anket.exe_31a6b1aa_abc5_4570_a489_14b8d42af1b0" />
+        <ComponentRef Id="_.installInfo.json_319627a9_06c4_4af4_9d24_b74cc24452f0" />
+        <ComponentRef Id="RegistryInstallPath" />
+        <ComponentRef Id="UninstallDisplayName" />
+        <ComponentRef Id="UninstallPublisher" />
+        <ComponentRef Id="UninstallDisplayVersion" />
+        <ComponentRef Id="UninstallModifyString" />
+        <ComponentRef Id="UninstallString" />
+        <ComponentRef Id="UninstallDisplayIcon" />
+        <ComponentRef Id="ApplicationShortcut" />
+        <ComponentRef Id="DesktopShortcut" />
+        <ComponentRef Id="PurgeOnUninstall" />
+      </Feature> 
+      <Feature Id="AutoLaunch" Title="Launch On Login" Level="2" Description="Enables launch on login for all users on this machine." >
+        <ComponentRef Id="RegistryRunKey" />
+      </Feature>
+    </Feature> 
+  </Product>
+</Wix>
