@@ -1,38 +1,4 @@
-/* eslint-disable no-sequences */
-/* eslint-disable no-constant-condition */
-/* eslint-disable no-plusplus */
-/* eslint-disable one-var */
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-new */
-/* eslint-disable no-unused-labels */
-/* eslint-disable object-shorthand */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-labels */
-/* eslint-disable vars-on-top */
-/* eslint-disable import/newline-after-import */
-/* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable import/extensions */
-/* eslint-disable @typescript-eslint/no-redeclare */
-/* eslint-disable no-lone-blocks */
-/* eslint-disable @typescript-eslint/return-await */
-/* eslint-disable consistent-return */
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable radix */
-/* eslint-disable prefer-template */
-/* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable no-self-compare */
-/* eslint-disable func-names */
-/* eslint-disable promise/no-nesting */
-/* eslint-disable import/no-unresolved */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable spaced-comment */
-/* eslint-disable no-var */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable prefer-const */
-/* eslint-disable prettier/prettier */
-/* eslint global-require: off, no-console: off, promise/always-return: off */
+/* eslint-disable */
 
 /**
  * This module executes inside of electron's main process. You can start
@@ -287,6 +253,14 @@ const createWindow = async () => {
     event.preventDefault();
     mainWindow?.show();
   });
+  mainWindow.webContents.on(
+    'render-process-gone',
+    (event: any, detailed: any) => {
+      if (detailed.reason === 'crashed') {
+        mainWindow.webContents.reload();
+      }
+    }
+  );
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -330,7 +304,7 @@ const createWindow = async () => {
   closeAppJob.start();
 
   var job = new CronJob(
-    '0 11,15 * * 1,2,3,4,5',
+    '30 13 * * 1,2,3,4,5',
     async function () {
       let healtyCheckInterval = setInterval(async () => {
         let result: any = await fetch(
